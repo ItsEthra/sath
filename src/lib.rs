@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 mod codegen;
 mod macros;
 
@@ -15,6 +17,8 @@ mod aspect;
 pub use aspect::*;
 mod euler;
 pub use euler::*;
+mod angle;
+pub use angle::*;
 
 /// Type of float used.
 #[cfg(not(feature = "use-f64"))]

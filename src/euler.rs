@@ -1,4 +1,4 @@
-use crate::FloatType as F;
+use crate::{Angle, Deg, FloatType as F, Rad};
 use std::{
     fmt::{self, Debug},
     marker::PhantomData,
@@ -10,28 +10,9 @@ pub type EulerD = Euler<Deg>;
 /// Euler radian angles.
 pub type EulerR = Euler<Rad>;
 
-/// Radians marker type.
-#[derive(Debug, Clone, Copy)]
-pub struct Rad;
-/// Degrees marker type.
-#[derive(Debug, Clone, Copy)]
-pub struct Deg;
-
-mod private {
-    pub trait Sealed {}
-    impl Sealed for super::Rad {}
-    impl Sealed for super::Deg {}
-}
-
-/// Helper trait to distinguish between radians and degrees.
-pub trait AngleMeasure: private::Sealed {}
-
-impl AngleMeasure for Rad {}
-impl AngleMeasure for Deg {}
-
 /// Euler angles
 #[derive(Clone, Copy)]
-pub struct Euler<A: AngleMeasure> {
+pub struct Euler<A: Angle> {
     /// Rotation around Z axis.
     pub yaw: F,
     /// Rotation around X axis.
@@ -42,7 +23,7 @@ pub struct Euler<A: AngleMeasure> {
     _pd: PhantomData<A>,
 }
 
-impl<A: AngleMeasure> Debug for Euler<A> {
+impl<A: Angle> Debug for Euler<A> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Euler")
             .field("yaw", &self.yaw)
@@ -52,9 +33,8 @@ impl<A: AngleMeasure> Debug for Euler<A> {
     }
 }
 
-impl Euler<Rad> {
-    /// Creates new euler angles. `yaw`, `pitch`, `roll` must be in radians!
-    #[inline]
+impl<A: Angle> Euler<A> {
+    /// Creates new euler angles from `yaw`, `pitch`, `roll`.
     pub fn new(yaw: F, pitch: F, roll: F) -> Self {
         Self {
             yaw,
@@ -63,7 +43,9 @@ impl Euler<Rad> {
             _pd: PhantomData,
         }
     }
+}
 
+impl Euler<Rad> {
     /// Converts radians to degrees.
     pub fn to_degrees(self) -> Euler<Deg> {
         Euler {
@@ -76,16 +58,6 @@ impl Euler<Rad> {
 }
 
 impl Euler<Deg> {
-    /// Creates new euler angles. `yaw`, `pitch`, `roll` must be in degrees!
-    pub fn new(yaw: F, pitch: F, roll: F) -> Self {
-        Self {
-            yaw,
-            pitch,
-            roll,
-            _pd: PhantomData,
-        }
-    }
-
     /// Converts degrees to radians.
     pub fn to_radians(self) -> Euler<Rad> {
         Euler {
@@ -96,7 +68,8 @@ impl Euler<Deg> {
         }
     }
 }
-impl<A: AngleMeasure> Add for Euler<A> {
+
+impl<A: Angle> Add for Euler<A> {
     type Output = Self;
 
     #[inline]
@@ -110,7 +83,7 @@ impl<A: AngleMeasure> Add for Euler<A> {
     }
 }
 
-impl<A: AngleMeasure> AddAssign for Euler<A> {
+impl<A: Angle> AddAssign for Euler<A> {
     #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.yaw += rhs.yaw;
@@ -119,7 +92,7 @@ impl<A: AngleMeasure> AddAssign for Euler<A> {
     }
 }
 
-impl<A: AngleMeasure> Sub for Euler<A> {
+impl<A: Angle> Sub for Euler<A> {
     type Output = Self;
 
     #[inline]
@@ -133,7 +106,7 @@ impl<A: AngleMeasure> Sub for Euler<A> {
     }
 }
 
-impl<A: AngleMeasure> SubAssign for Euler<A> {
+impl<A: Angle> SubAssign for Euler<A> {
     #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.yaw -= rhs.yaw;
@@ -142,7 +115,7 @@ impl<A: AngleMeasure> SubAssign for Euler<A> {
     }
 }
 
-impl<A: AngleMeasure> Mul<F> for Euler<A> {
+impl<A: Angle> Mul<F> for Euler<A> {
     type Output = Self;
 
     #[inline]
@@ -156,7 +129,7 @@ impl<A: AngleMeasure> Mul<F> for Euler<A> {
     }
 }
 
-impl<A: AngleMeasure> MulAssign<F> for Euler<A> {
+impl<A: Angle> MulAssign<F> for Euler<A> {
     #[inline]
     fn mul_assign(&mut self, rhs: F) {
         self.yaw *= rhs;
@@ -165,7 +138,7 @@ impl<A: AngleMeasure> MulAssign<F> for Euler<A> {
     }
 }
 
-impl<A: AngleMeasure> Div<F> for Euler<A> {
+impl<A: Angle> Div<F> for Euler<A> {
     type Output = Self;
 
     #[inline]
@@ -179,7 +152,7 @@ impl<A: AngleMeasure> Div<F> for Euler<A> {
     }
 }
 
-impl<A: AngleMeasure> DivAssign<F> for Euler<A> {
+impl<A: Angle> DivAssign<F> for Euler<A> {
     #[inline]
     fn div_assign(&mut self, rhs: F) {
         self.yaw /= rhs;
@@ -188,7 +161,7 @@ impl<A: AngleMeasure> DivAssign<F> for Euler<A> {
     }
 }
 
-impl<A: AngleMeasure> Neg for Euler<A> {
+impl<A: Angle> Neg for Euler<A> {
     type Output = Self;
 
     #[inline]

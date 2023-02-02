@@ -1,6 +1,10 @@
+use crate::{Float, Quaternion, Vector2, Vector4};
 use std::cmp::Ordering;
 
-use crate::{Float, Quaternion, Vector2, Vector4};
+/// Single precession Vector3.
+pub type Vector3f = Vector3<f32>;
+/// Double precession Vector3.
+pub type Vector3d = Vector3<f64>;
 
 /// 3 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]

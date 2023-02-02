@@ -1,6 +1,11 @@
 use crate::{Complex, Float, Vector3};
 use std::{cmp::Ordering, ops::Mul};
 
+/// Single precession Vector2.
+pub type Vector2f = Vector2<f32>;
+/// Double precession Vector2.
+pub type Vector2d = Vector2<f64>;
+
 /// 2 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]

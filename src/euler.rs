@@ -6,14 +6,14 @@ use std::{
 };
 
 /// Euler degree-float angles.
-pub type EulerDegF = Euler<Deg, f32>;
+pub type EulerDegf = Euler<Deg, f32>;
 /// Euler degree-float angles.
-pub type EulerDegD = Euler<Deg, f64>;
+pub type EulerDegd = Euler<Deg, f64>;
 
 /// Euler radian angles.
-pub type EulerRadF = Euler<Rad, f32>;
+pub type EulerRadf = Euler<Rad, f32>;
 /// Euler radian angles.
-pub type EulerRadD = Euler<Rad, f64>;
+pub type EulerRadd = Euler<Rad, f64>;
 
 /// Euler angles
 #[derive(Clone, Copy)]

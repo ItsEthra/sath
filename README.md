@@ -4,7 +4,7 @@ Safe math library
 # Installation
 ```toml
 [dependencies]
-sath = { git = "https://github.com/ItsEthra/sath.git" }
+sath = "0.1"
 ```
 
 # Usage

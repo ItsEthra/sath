@@ -1,5 +1,5 @@
 use crate::{Complex, Float, Vector3};
-use std::{cmp::Ordering, ops::Mul};
+use std::ops::Mul;
 
 /// 2 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -10,7 +10,14 @@ pub struct Vector2<F: Float> {
 }
 
 impl<F: Float> Vector2<F> {
+    /// Creates new vector.
+    #[inline]
+    pub const fn new(x: F, y: F) -> Self {
+        Self { x, y }
+    }
+
     /// Converts a vector to a complex number with `real` = `x`, `imag` = `y`.
+    #[inline]
     pub const fn to_complex(self) -> Complex<F> {
         Complex {
             real: self.x,
@@ -19,6 +26,7 @@ impl<F: Float> Vector2<F> {
     }
 
     /// Converts a complex number to a vector with `x` = `real`, `y` = `imag`.
+    #[inline]
     pub const fn from_complex(complex: Complex<F>) -> Self {
         Self {
             x: complex.real,
@@ -27,12 +35,19 @@ impl<F: Float> Vector2<F> {
     }
 
     /// Extends the vector with `z` component to create a [`Vector3`].
+    #[inline]
     pub const fn extend(self, z: F) -> Vector3<F> {
         Vector3 {
             x: self.x,
             y: self.y,
             z,
         }
+    }
+
+    /// Computes dot product
+    #[inline]
+    pub fn dot(&self, other: Self) -> F {
+        self.x * other.x + self.y * other.y
     }
 
     /// Rotates angle around origin by some angle `angle` in radians counter-clockwise.
@@ -57,45 +72,6 @@ impl<F: Float> Vector2<F> {
     #[inline]
     pub fn rotated_by_clockwise(self, angle: F) -> Self {
         self * Complex::from_angle(angle).conjugate()
-    }
-
-    /// Returns maximum element of the vector.
-    #[inline]
-    pub fn max_element(&self) -> F {
-        self.x.max(self.y)
-    }
-
-    /// Returns minumum element of the vector.
-    #[inline]
-    pub fn min_element(&self) -> F {
-        self.x.min(self.y)
-    }
-
-    /// Returns index of the maximum element.
-    /// Index is in `0..=1` range.
-    #[inline]
-    pub fn max_index(&self) -> usize {
-        [(self.x, 0), (self.y, 1)]
-            .iter()
-            .max_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
-            .map(|(_, i)| *i)
-            .unwrap()
-    }
-
-    /// Returns index of the minumum element.
-    /// Index is in `0..=1` range.
-    #[inline]
-    pub fn min_index(&self) -> usize {
-        [(self.x, 0), (self.y, 1)]
-            .iter()
-            .min_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
-            .map(|(_, i)| *i)
-            .unwrap()
-    }
-
-    #[inline]
-    pub fn reflect(&self, axis: Self) -> Self {
-        self.projected_onto(axis) * 2. - *self
     }
 }
 

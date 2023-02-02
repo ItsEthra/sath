@@ -11,7 +11,7 @@ impl sealed::Sealed for f32 {}
 impl sealed::Sealed for f64 {}
 
 macro_rules! forward_float_impl {
-    ($f32:ident, $f64:ident, [$($cnt:ident),*], $(fn $method:ident($($aname:ident: $aty:ty),*) $(-> $ret:ty)?);*$(;)?) => {
+    ($f32:ident, $f64:ident, $(fn $method:ident($($aname:ident: $aty:ty),*) $(-> $ret:ty)?);*$(;)?) => {
         pub trait Float:
             Add<Output = Self> +
             AddAssign +
@@ -32,6 +32,7 @@ macro_rules! forward_float_impl {
             Sized +
             'static
         {
+            const TWO: Self;
             const ONE: Self;
             const ZERO: Self;
 
@@ -41,6 +42,7 @@ macro_rules! forward_float_impl {
         }
 
         impl Float for $f32 {
+            const TWO: Self = 2.0;
             const ONE: Self = 1.0;
             const ZERO: Self = 0.0;
 
@@ -53,6 +55,7 @@ macro_rules! forward_float_impl {
         }
 
         impl Float for $f64 {
+            const TWO: Self = 2.0;
             const ONE: Self = 1.0;
             const ZERO: Self = 0.0;
 
@@ -67,8 +70,6 @@ macro_rules! forward_float_impl {
 }
 
 forward_float_impl! { f32, f64,
-    [],
-
     fn sin() -> Self;
     fn cos() -> Self;
     fn atan2(x: Self) -> Self;

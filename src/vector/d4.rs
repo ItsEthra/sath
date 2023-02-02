@@ -1,5 +1,4 @@
 use crate::{Float, Vector3};
-use std::cmp::Ordering;
 
 /// 4 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -26,38 +25,10 @@ impl<F: Float> Vector4<F> {
         }
     }
 
-    /// Returns maximum element of the vector.
+    /// Computes dot product
     #[inline]
-    pub fn max_element(&self) -> F {
-        self.x.max(self.y.max(self.z.max(self.w)))
-    }
-
-    /// Returns minumum element of the vector.
-    #[inline]
-    pub fn min_element(&self) -> F {
-        self.x.min(self.y.min(self.z.min(self.w)))
-    }
-
-    /// Returns index of the maximum element.
-    /// Index is in `0..=3` range.
-    #[inline]
-    pub fn max_index(&self) -> usize {
-        [(self.x, 0), (self.y, 1), (self.z, 2), (self.w, 3)]
-            .iter()
-            .max_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
-            .map(|(_, i)| *i)
-            .unwrap()
-    }
-
-    /// Returns index of the minimum element.
-    /// Index is in `0..=3` range.
-    #[inline]
-    pub fn min_index(&self) -> usize {
-        [(self.x, 0), (self.y, 1), (self.z, 2), (self.w, 3)]
-            .iter()
-            .min_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
-            .map(|(_, i)| *i)
-            .unwrap()
+    pub fn dot(&self, other: Self) -> F {
+        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
 }
 

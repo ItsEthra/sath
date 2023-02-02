@@ -46,6 +46,18 @@ impl<F: Float> Complex<F> {
         self.imag.atan2(self.real)
     }
 
+    /// Computes squared magnitude.
+    #[inline]
+    pub fn sqr_magnitude(&self) -> F {
+        self.real * self.real + self.imag * self.imag
+    }
+
+    /// Computes magnitude.
+    #[inline]
+    pub fn magnitude(&self) -> F {
+        self.sqr_magnitude().sqrt()
+    }
+
     /// Returns complex number's magnitude and angle in radians.
     #[inline]
     pub fn to_magnitude_angle(self) -> (F, F) {
@@ -77,8 +89,8 @@ impl<F: Float> Complex<F> {
     #[inline]
     pub fn sqrt(self) -> (Self, Self) {
         let mag = self.magnitude();
-        let gamma = ((self.real + mag) / 2.).sqrt();
-        let delta = self.imag.signum() * ((-self.real + mag) / 2.).sqrt();
+        let gamma = ((self.real + mag) / F::TWO).sqrt();
+        let delta = self.imag.signum() * ((-self.real + mag) / F::TWO).sqrt();
 
         (
             Self {

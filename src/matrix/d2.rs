@@ -15,6 +15,15 @@ pub struct Matrix2<F: Float> {
 }
 
 impl<F: Float> Matrix2<F> {
+    /// Matrix with all elements equal to `0`.
+    pub const ZERO: Self = Self::new(F::ZERO, F::ZERO, F::ZERO, F::ZERO);
+    /// Matrix with all elements equal to `1`.
+    pub const ONE: Self = Self::new(F::ONE, F::ONE, F::ONE, F::ONE);
+    /// Identity matrix with diagonal elements equal to `1` and `0` for every other.
+    pub const IDENTITY: Self = Self::new(F::ONE, F::ZERO, F::ZERO, F::ONE);
+}
+
+impl<F: Float> Matrix2<F> {
     /// Creates a new matrix from individual elements.
     pub const fn new(m11: F, m12: F, m21: F, m22: F) -> Self {
         Matrix2 {
@@ -204,3 +213,5 @@ impl<F: Float> Debug for Matrix2<F> {
 
 unsafe impl<F: Float> bytemuck::Pod for Matrix2<F> {}
 unsafe impl<F: Float> bytemuck::Zeroable for Matrix2<F> {}
+
+crate::__impl_mat_ops!(Matrix2, Vector2, 2, row1, row2);

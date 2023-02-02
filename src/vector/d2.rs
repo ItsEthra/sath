@@ -1,5 +1,5 @@
 use crate::{Complex, Float, Vector3};
-use std::ops::Mul;
+use std::{cmp::Ordering, ops::Mul};
 
 /// 2 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -7,6 +7,15 @@ use std::ops::Mul;
 pub struct Vector2<F: Float> {
     pub x: F,
     pub y: F,
+}
+
+impl<F: Float> Vector2<F> {
+    pub const ZERO: Self = Self::new(F::ZERO, F::ZERO);
+    pub const ONE: Self = Self::new(F::ONE, F::ONE);
+
+    pub const X: Self = Self::new(F::ONE, F::ZERO);
+    pub const Y: Self = Self::new(F::ZERO, F::ONE);
+    pub const XY: Self = Self::new(F::ONE, F::ONE);
 }
 
 impl<F: Float> Vector2<F> {
@@ -60,6 +69,45 @@ impl<F: Float> Vector2<F> {
     #[inline]
     pub fn rotated_by_clockwise(self, angle: F) -> Self {
         self * Complex::from_angle(angle).conjugate()
+    }
+
+    /// Returns maximum element of the vector.
+    #[inline]
+    pub fn max_element(&self) -> F {
+        self.x.max(self.y)
+    }
+
+    /// Returns minumum element of the vector.
+    #[inline]
+    pub fn min_element(&self) -> F {
+        self.x.min(self.y)
+    }
+
+    /// Returns index of the maximum element.
+    /// Index is in `0..=1` range.
+    #[inline]
+    pub fn max_index(&self) -> usize {
+        [(self.x, 0), (self.y, 1)]
+            .iter()
+            .max_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+            .map(|(_, i)| *i)
+            .unwrap()
+    }
+
+    /// Returns index of the minumum element.
+    /// Index is in `0..=1` range.
+    #[inline]
+    pub fn min_index(&self) -> usize {
+        [(self.x, 0), (self.y, 1)]
+            .iter()
+            .min_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+            .map(|(_, i)| *i)
+            .unwrap()
+    }
+
+    #[inline]
+    pub fn reflect(&self, axis: Self) -> Self {
+        self.projected_onto(axis) * F::TWO - *self
     }
 }
 

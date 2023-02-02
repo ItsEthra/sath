@@ -15,6 +15,29 @@ pub struct Matrix4<F: Float> {
 }
 
 impl<F: Float> Matrix4<F> {
+    pub const ZERO: Self = Self {
+        row1: Vector4::ZERO,
+        row2: Vector4::ZERO,
+        row3: Vector4::ZERO,
+        row4: Vector4::ZERO,
+    };
+
+    pub const ONE: Self = Self {
+        row1: Vector4::ONE,
+        row2: Vector4::ONE,
+        row3: Vector4::ONE,
+        row4: Vector4::ONE,
+    };
+
+    pub const IDENTITY: Self = Self {
+        row1: Vector4::X,
+        row2: Vector4::Y,
+        row3: Vector4::Z,
+        row4: Vector4::W,
+    };
+}
+
+impl<F: Float> Matrix4<F> {
     #[rustfmt::skip]
     #[allow(clippy::too_many_arguments)]
     pub const fn new(
@@ -43,7 +66,7 @@ impl<F: Float> Matrix4<F> {
 
     /// Creates new matrix that represents translation in 3D space.
     pub const fn new_translation(translation: Vector3<F>) -> Self {
-        let mut m: Self = todo!();
+        let mut m = Self::IDENTITY;
         m.row1.w = translation.x;
         m.row2.w = translation.y;
         m.row3.w = translation.z;
@@ -190,8 +213,7 @@ impl<F: Float> Matrix4<F> {
     /// Computes the determinant of the matrix.
     pub fn det(&self) -> F {
         let mut copy = *self;
-        todo!();
-        // copy.to_row_echelon();
+        copy.to_row_echelon();
 
         copy.diagonal().product()
     }
@@ -288,3 +310,5 @@ impl<F: Float> fmt::Debug for Matrix4<F> {
 
 unsafe impl<F: Float> bytemuck::Pod for Matrix4<F> {}
 unsafe impl<F: Float> bytemuck::Zeroable for Matrix4<F> {}
+
+crate::__impl_mat_ops!(Matrix4, Vector4, 4, row1, row2, row3, row4);

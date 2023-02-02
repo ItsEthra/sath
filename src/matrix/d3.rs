@@ -18,6 +18,29 @@ pub struct Matrix3<F: Float> {
 }
 
 impl<F: Float> Matrix3<F> {
+    /// Matrix with all elements equal to `0`.
+    pub const ZERO: Self = Self {
+        row1: Vector3::ZERO,
+        row2: Vector3::ZERO,
+        row3: Vector3::ZERO,
+    };
+
+    /// Matrix with all elements equal to `1`.
+    pub const ONE: Self = Self {
+        row1: Vector3::ONE,
+        row2: Vector3::ONE,
+        row3: Vector3::ONE,
+    };
+
+    /// Identity matrix with diagonal elements equal to `1` and `0` for every other.
+    pub const IDENTITY: Self = Self {
+        row1: Vector3::new(F::ONE, F::ZERO, F::ZERO),
+        row2: Vector3::new(F::ZERO, F::ONE, F::ZERO),
+        row3: Vector3::new(F::ZERO, F::ZERO, F::ONE),
+    };
+}
+
+impl<F: Float> Matrix3<F> {
     /// Creates a new matrix from individual elements.
     #[allow(clippy::too_many_arguments)]
     #[rustfmt::skip]
@@ -266,8 +289,7 @@ impl<F: Float> Matrix3<F> {
     /// Computes the determinant of the matrix.
     pub fn det(&self) -> F {
         let mut copy = *self;
-        todo!();
-        // copy.to_row_echelon();
+        copy.to_row_echelon();
 
         copy.diagonal().product()
     }
@@ -359,3 +381,5 @@ impl<F: Float> fmt::Debug for Matrix3<F> {
 
 unsafe impl<F: Float> bytemuck::Pod for Matrix3<F> {}
 unsafe impl<F: Float> bytemuck::Zeroable for Matrix3<F> {}
+
+crate::__impl_mat_ops!(Matrix3, Vector3, 3, row1, row2, row3);

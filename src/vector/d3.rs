@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::{Float, Quaternion, Vector2, Vector4};
 
 /// 3 Dimensional vector.
@@ -7,6 +9,20 @@ pub struct Vector3<F: Float> {
     pub x: F,
     pub y: F,
     pub z: F,
+}
+
+impl<F: Float> Vector3<F> {
+    pub const ZERO: Self = Self::new(F::ZERO, F::ZERO, F::ZERO);
+    pub const ONE: Self = Self::new(F::ONE, F::ONE, F::ONE);
+
+    pub const X: Self = Self::new(F::ONE, F::ZERO, F::ZERO);
+    pub const Y: Self = Self::new(F::ZERO, F::ONE, F::ZERO);
+    pub const Z: Self = Self::new(F::ZERO, F::ZERO, F::ONE);
+
+    pub const XY: Self = Self::new(F::ONE, F::ONE, F::ZERO);
+    pub const YZ: Self = Self::new(F::ZERO, F::ONE, F::ONE);
+    pub const XZ: Self = Self::new(F::ONE, F::ZERO, F::ONE);
+    pub const XYZ: Self = Self::new(F::ONE, F::ONE, F::ONE);
 }
 
 impl<F: Float> Vector3<F> {
@@ -62,6 +78,40 @@ impl<F: Float> Vector3<F> {
             .hamilton_product(&Quaternion::from_vector(self))
             .hamilton_product(&rotation.reciprocal())
             .vector
+    }
+
+    /// Returns maximum element of the vector.
+    #[inline]
+    pub fn max_element(&self) -> F {
+        self.x.max(self.y.max(self.z))
+    }
+
+    /// Returns minumum element of the vector.
+    #[inline]
+    pub fn min_element(&self) -> F {
+        self.x.min(self.y.min(self.z))
+    }
+
+    /// Returns index of the maximum element.
+    /// Index is in `0..=2` range.
+    #[inline]
+    pub fn max_index(&self) -> usize {
+        [(self.x, 0), (self.y, 1), (self.z, 2)]
+            .iter()
+            .max_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+            .map(|(_, i)| *i)
+            .unwrap()
+    }
+
+    /// Returns index of the minumum element.
+    /// Index is in `0..=2` range.
+    #[inline]
+    pub fn min_index(&self) -> usize {
+        [(self.x, 0), (self.y, 1), (self.z, 2)]
+            .iter()
+            .min_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+            .map(|(_, i)| *i)
+            .unwrap()
     }
 }
 

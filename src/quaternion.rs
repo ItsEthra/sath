@@ -1,4 +1,4 @@
-use crate::{matrix, Euler, FloatType as F, Matrix3, Rad, Vector3};
+use crate::{matrix, Euler, Float, Matrix3, Rad, Vector3};
 use std::{
     fmt,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
@@ -6,31 +6,17 @@ use std::{
 
 /// Quaternion representing a rotation in 3d space.
 #[derive(Clone, Copy, PartialEq)]
-pub struct Quaternion {
+pub struct Quaternion<F: Float> {
     /// Scalar part.
     pub scalar: F,
     /// Vector part.
-    pub vector: Vector3,
+    pub vector: Vector3<F>,
 }
 
-impl Quaternion {
-    /// Zero quaternion with all elements set to `0`.
-    pub const ZERO: Self = Self {
-        scalar: 0.0,
-        vector: Vector3::ZERO,
-    };
-
-    /// Identity quaternion representing no rotation.
-    pub const IDENTITY: Self = Self {
-        scalar: 1.0,
-        vector: Vector3::ZERO,
-    };
-}
-
-impl Quaternion {
+impl<F: Float> Quaternion<F> {
     /// Creates a new quaternion from individual elements.
     #[inline]
-    pub fn new(scalar: F, vector: Vector3) -> Self {
+    pub fn new(scalar: F, vector: Vector3<F>) -> Self {
         Self { scalar, vector }
     }
 
@@ -38,8 +24,8 @@ impl Quaternion {
     /// on `angle` in radians.
     /// To avoid unexpected results, use normalized axis.
     #[inline]
-    pub fn new_axis_angle(axis: Vector3, angle: F) -> Self {
-        let half = angle / 2.;
+    pub fn new_axis_angle(axis: Vector3<F>, angle: F) -> Self {
+        let half = angle / (F::ONE + F::ONE);
 
         Self {
             scalar: half.cos(),
@@ -47,53 +33,54 @@ impl Quaternion {
         }
     }
 
-    /// Creates a rotation that rotates forward vector to face `target` from position `from`,
-    /// aligned upwards.
-    pub fn new_look_at(target: Vector3, eye: Vector3) -> Self {
-        let q1 = Self::new_axis_angle(
-            Vector3::FORWARD.cross(target - eye).normalized(),
-            (target - eye).dot_normalized(Vector3::FORWARD).acos(),
-        );
+    // Creates a rotation that rotates forward vector to face `target` from position `from`,
+    // aligned upwards.
+    // pub fn new_look_at(target: Vector3<F>, eye: Vector3<F>) -> Self {
+    //     let q1 = Self::new_axis_angle(
+    //         Vector3::FORWARD.cross(target - eye).normalized(),
+    //         (target - eye).dot_normalized(Vector3::FORWARD).acos(),
+    //     );
 
-        let aligned_r = Vector3::FORWARD
-            .rotated_by(q1)
-            .cross(Vector3::UP)
-            .normalized();
-        let loc_r = Vector3::RIGHT.rotated_by(q1);
+    //     let aligned_r = Vector3::FORWARD
+    //         .rotated_by(q1)
+    //         .cross(Vector3::UP)
+    //         .normalized();
+    //     let loc_r = Vector3::RIGHT.rotated_by(q1);
 
-        let q2 = Self::new_axis_angle(
-            loc_r.cross(aligned_r).normalized(),
-            loc_r.dot_normalized(aligned_r).acos(),
-        );
+    //     let q2 = Self::new_axis_angle(
+    //         loc_r.cross(aligned_r).normalized(),
+    //         loc_r.dot_normalized(aligned_r).acos(),
+    //     );
 
-        q2 * q1
-    }
+    //     q2 * q1
+    // }
 
     /// Recovers axis angle represention.
     #[inline]
-    pub fn into_axis_angle(&self) -> (Vector3, F) {
+    pub fn into_axis_angle(&self) -> (Vector3<F>, F) {
         (
             self.vector.normalized(),
-            self.vector.magnitude().atan2(self.scalar) * 2.,
+            self.vector.magnitude().atan2(self.scalar) * F::TWO,
         )
     }
-
     /// Converts quaternion into euler angles.
     #[inline]
-    pub fn into_euler(&self) -> Euler<Rad> {
-        Euler::<Rad>::new(
-            (2. * (self.scalar * self.vector.z + self.vector.x * self.vector.y))
-                .atan2(1. - 2. * (self.vector.y * self.vector.y + self.vector.z * self.vector.z)),
-            (2. * (self.scalar * self.vector.x + self.vector.y * self.vector.z))
-                .atan2(1. - 2. * (self.vector.x * self.vector.x + self.vector.y * self.vector.y)),
-            (2. * (self.scalar * self.vector.y - self.vector.z * self.vector.x)).asin(),
+    pub fn into_euler(&self) -> Euler<Rad, F> {
+        Euler::new(
+            (F::TWO * (self.scalar * self.vector.z + self.vector.x * self.vector.y)).atan2(
+                F::ONE - F::TWO * (self.vector.y * self.vector.y + self.vector.z * self.vector.z),
+            ),
+            (F::TWO * (self.scalar * self.vector.x + self.vector.y * self.vector.z)).atan2(
+                F::ONE - F::TWO * (self.vector.x * self.vector.x + self.vector.y * self.vector.y),
+            ),
+            (F::TWO * (self.scalar * self.vector.y - self.vector.z * self.vector.x)).asin(),
         )
     }
 
     /// Converts euler angles to quaternion.
     #[inline]
-    pub fn from_euler(angles: Euler<Rad>) -> Self {
-        let half = angles / 2.;
+    pub fn from_euler(angles: Euler<Rad, F>) -> Self {
+        let half = angles / F::TWO;
 
         Self {
             scalar: half.pitch.cos() * half.roll.cos() * half.yaw.cos()
@@ -111,9 +98,9 @@ impl Quaternion {
 
     /// Creates a new quaternion with vector part equal to `vector` and scalar part to `0`.
     #[inline]
-    pub fn from_vector(vector: Vector3) -> Self {
+    pub fn from_vector(vector: Vector3<F>) -> Self {
         Self {
-            scalar: 0.0,
+            scalar: F::ZERO,
             vector,
         }
     }
@@ -213,7 +200,7 @@ impl Quaternion {
 
     /// Linearly interpolates the quaternion.
     pub fn lerp(self, end: Self, t: F) -> Self {
-        self * (1.0 - t) + end * t
+        self * (F::ONE - t) + end * t
     }
 
     /// Returns a normalized copy of linear interpolation.
@@ -227,20 +214,26 @@ impl Quaternion {
     }
 
     /// Converts a quaternion representing rotation to a matrix representing the same rotation.
-    pub fn into_matrix3(self) -> Matrix3 {
+    pub fn into_matrix3(self) -> Matrix3<F> {
         matrix!(
             self.scalar * self.scalar + self.vector.x * self.vector.x
                 - self.vector.y * self.vector.y
                 - self.vector.z * self.vector.z,
-            2. * self.vector.x * self.vector.y - 2. * self.scalar * self.vector.z,
-            2. * self.vector.x * self.vector.z + 2. * self.scalar * self.vector.y,
-            2. * self.vector.x * self.vector.y + 2. * self.scalar * self.vector.z,
+            (F::ONE + F::ONE) * self.vector.x * self.vector.y
+                - (F::ONE + F::ONE) * self.scalar * self.vector.z,
+            (F::ONE + F::ONE) * self.vector.x * self.vector.z
+                + (F::ONE + F::ONE) * self.scalar * self.vector.y,
+            (F::ONE + F::ONE) * self.vector.x * self.vector.y
+                + (F::ONE + F::ONE) * self.scalar * self.vector.z,
             self.scalar * self.scalar - self.vector.x * self.vector.x
                 + self.vector.y * self.vector.y
                 - self.vector.z * self.vector.z,
-            2. * self.vector.y * self.vector.z - 2. * self.scalar * self.vector.x,
-            2. * self.vector.x * self.vector.z - 2. * self.scalar * self.vector.y,
-            2. * self.vector.y * self.vector.z + 2. * self.scalar * self.vector.x,
+            (F::ONE + F::ONE) * self.vector.y * self.vector.z
+                - (F::ONE + F::ONE) * self.scalar * self.vector.x,
+            (F::ONE + F::ONE) * self.vector.x * self.vector.z
+                - (F::ONE + F::ONE) * self.scalar * self.vector.y,
+            (F::ONE + F::ONE) * self.vector.y * self.vector.z
+                + (F::ONE + F::ONE) * self.scalar * self.vector.x,
             self.scalar * self.scalar
                 - self.vector.x * self.vector.x
                 - self.vector.y * self.vector.y
@@ -249,14 +242,14 @@ impl Quaternion {
     }
 }
 
-impl From<(Vector3, F)> for Quaternion {
+impl<F: Float> From<(Vector3<F>, F)> for Quaternion<F> {
     /// Converts from axis, angle to quaternion.
-    fn from((axis, angle): (Vector3, F)) -> Self {
+    fn from((axis, angle): (Vector3<F>, F)) -> Self {
         Self::new_axis_angle(axis, angle)
     }
 }
 
-impl Mul for Quaternion {
+impl<F: Float> Mul for Quaternion<F> {
     type Output = Self;
 
     #[inline]
@@ -265,14 +258,14 @@ impl Mul for Quaternion {
     }
 }
 
-impl MulAssign for Quaternion {
+impl<F: Float> MulAssign for Quaternion<F> {
     #[inline]
     fn mul_assign(&mut self, rhs: Self) {
         *self = self.hamilton_product(&rhs);
     }
 }
 
-impl Mul<F> for Quaternion {
+impl<F: Float> Mul<F> for Quaternion<F> {
     type Output = Self;
 
     #[inline]
@@ -284,7 +277,7 @@ impl Mul<F> for Quaternion {
     }
 }
 
-impl MulAssign<F> for Quaternion {
+impl<F: Float> MulAssign<F> for Quaternion<F> {
     #[inline]
     fn mul_assign(&mut self, rhs: F) {
         self.scalar *= rhs;
@@ -292,7 +285,7 @@ impl MulAssign<F> for Quaternion {
     }
 }
 
-impl Div<F> for Quaternion {
+impl<F: Float> Div<F> for Quaternion<F> {
     type Output = Self;
 
     #[inline]
@@ -304,7 +297,7 @@ impl Div<F> for Quaternion {
     }
 }
 
-impl DivAssign<F> for Quaternion {
+impl<F: Float> DivAssign<F> for Quaternion<F> {
     #[inline]
     fn div_assign(&mut self, rhs: F) {
         self.scalar /= rhs;
@@ -312,7 +305,7 @@ impl DivAssign<F> for Quaternion {
     }
 }
 
-impl Add for Quaternion {
+impl<F: Float> Add for Quaternion<F> {
     type Output = Self;
 
     #[inline]
@@ -324,7 +317,7 @@ impl Add for Quaternion {
     }
 }
 
-impl AddAssign for Quaternion {
+impl<F: Float> AddAssign for Quaternion<F> {
     #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.scalar += rhs.scalar;
@@ -332,7 +325,7 @@ impl AddAssign for Quaternion {
     }
 }
 
-impl Sub for Quaternion {
+impl<F: Float> Sub for Quaternion<F> {
     type Output = Self;
 
     #[inline]
@@ -344,7 +337,7 @@ impl Sub for Quaternion {
     }
 }
 
-impl SubAssign for Quaternion {
+impl<F: Float> SubAssign for Quaternion<F> {
     #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.scalar -= rhs.scalar;
@@ -352,7 +345,7 @@ impl SubAssign for Quaternion {
     }
 }
 
-impl fmt::Debug for Quaternion {
+impl<F: Float> fmt::Debug for Quaternion<F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (axis, angle) = self.into_axis_angle();
 

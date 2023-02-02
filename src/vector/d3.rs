@@ -1,52 +1,33 @@
-use crate::{vector, FloatType as F, Quaternion, Vector2, Vector4};
 use std::cmp::Ordering;
+
+use crate::{Float, Quaternion, Vector2, Vector4};
 
 /// 3 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
-pub struct Vector3 {
+pub struct Vector3<F: Float> {
     pub x: F,
     pub y: F,
     pub z: F,
 }
 
-/// Constants with respective elements set to `-1`.
-impl Vector3 {
-    pub const X: Self = vector!(1, 0, 0);
-    pub const Y: Self = vector!(0, 1, 0);
-    pub const Z: Self = vector!(0, 0, 1);
+impl<F: Float> Vector3<F> {
+    pub const ZERO: Self = Self::new(F::ZERO, F::ZERO, F::ZERO);
+    pub const ONE: Self = Self::new(F::ONE, F::ONE, F::ONE);
 
-    pub const XY: Self = vector!(1, 1, 0);
-    pub const YZ: Self = vector!(0, 1, 1);
-    pub const XZ: Self = vector!(1, 0, 1);
-    pub const XYZ: Self = vector!(1, 1, 1);
+    pub const X: Self = Self::new(F::ONE, F::ZERO, F::ZERO);
+    pub const Y: Self = Self::new(F::ZERO, F::ONE, F::ZERO);
+    pub const Z: Self = Self::new(F::ZERO, F::ZERO, F::ONE);
+
+    pub const XY: Self = Self::new(F::ONE, F::ONE, F::ZERO);
+    pub const YZ: Self = Self::new(F::ZERO, F::ONE, F::ONE);
+    pub const XZ: Self = Self::new(F::ONE, F::ZERO, F::ONE);
+    pub const XYZ: Self = Self::new(F::ONE, F::ONE, F::ONE);
 }
 
-impl Vector3 {
-    /// (0, 0, 0)
-    pub const ZERO: Self = vector!(0, 0, 0);
-    /// (1, 1, 1)
-    pub const ONE: Self = vector!(1, 1, 1);
-
-    /// Right: (1, 0, 0)
-    pub const RIGHT: Self = vector!(1, 0, 0);
-    /// Left: (-1, 0, 0)
-    pub const LEFT: Self = vector!(-1, 0, 0);
-
-    /// Forward: (0, 1, 0)
-    pub const FORWARD: Self = vector!(0, 1, 0);
-    /// Back: (0, -1, 0)
-    pub const BACK: Self = vector!(0, -1, 0);
-
-    /// Up: (0, 0, 1)
-    pub const UP: Self = vector!(0, 0, 1);
-    /// Down: (0, 0, -1)
-    pub const DOWN: Self = vector!(0, 0, -1);
-}
-
-impl Vector3 {
+impl<F: Float> Vector3<F> {
     /// Extends the vector with `w` component to create a [`Vector4`].
-    pub const fn extend(self, w: F) -> Vector4 {
+    pub const fn extend(self, w: F) -> Vector4<F> {
         Vector4 {
             x: self.x,
             y: self.y,
@@ -56,7 +37,7 @@ impl Vector3 {
     }
 
     /// Truncates vector to [`Vector2`], removing `z` component.
-    pub const fn truncate(self) -> Vector2 {
+    pub const fn truncate(self) -> Vector2<F> {
         Vector2 {
             x: self.x,
             y: self.y,
@@ -83,7 +64,7 @@ impl Vector3 {
 
     /// Rotates the vector by a rotation specified by `rotation` quaternion.
     #[inline]
-    pub fn rotate_by(&mut self, rotation: Quaternion) {
+    pub fn rotate_by(&mut self, rotation: Quaternion<F>) {
         *self = rotation
             .hamilton_product(&Quaternion::from_vector(*self))
             .hamilton_product(&rotation.reciprocal())
@@ -92,7 +73,7 @@ impl Vector3 {
 
     /// Returns a rotated copy of the vector by a rotation specified by `rotation` quaternion.
     #[inline]
-    pub fn rotated_by(self, rotation: Quaternion) -> Self {
+    pub fn rotated_by(self, rotation: Quaternion<F>) -> Self {
         rotation
             .hamilton_product(&Quaternion::from_vector(self))
             .hamilton_product(&rotation.reciprocal())
@@ -132,17 +113,10 @@ impl Vector3 {
             .map(|(_, i)| *i)
             .unwrap()
     }
-
-    /// Reflects a vector off the plane defined by its normal, resulting vector is coplanar to
-    /// other two.
-    #[inline]
-    pub fn reflect(&self, normal: Self) -> Self {
-        *self - self.projected_onto(normal) * 2.
-    }
 }
 
-unsafe impl bytemuck::Pod for Vector3 {}
-unsafe impl bytemuck::Zeroable for Vector3 {}
+unsafe impl<F: Float> bytemuck::Pod for Vector3<F> {}
+unsafe impl<F: Float> bytemuck::Zeroable for Vector3<F> {}
 
 crate::__impl_vec_ops!(Vector3, 2, x, y, z);
 crate::__impl_planar_ops!(Vector3, [x, 0, F], [y, 1, F], [z, 2, F]);

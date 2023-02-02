@@ -1,18 +1,23 @@
-use crate::{Angle, Deg, FloatType as F, Rad};
+use crate::{Angle, Deg, Float, Rad};
 use std::{
     fmt::{self, Debug},
     marker::PhantomData,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
-/// Euler degree angles.
-pub type EulerD = Euler<Deg>;
+/// Euler degree-float angles.
+pub type EulerDegF = Euler<Deg, f32>;
+/// Euler degree-float angles.
+pub type EulerDegD = Euler<Deg, f64>;
+
 /// Euler radian angles.
-pub type EulerR = Euler<Rad>;
+pub type EulerRadF = Euler<Rad, f32>;
+/// Euler radian angles.
+pub type EulerRadD = Euler<Rad, f64>;
 
 /// Euler angles
 #[derive(Clone, Copy)]
-pub struct Euler<A: Angle> {
+pub struct Euler<A: Angle, F: Float> {
     /// Rotation around Z axis.
     pub yaw: F,
     /// Rotation around X axis.
@@ -23,7 +28,7 @@ pub struct Euler<A: Angle> {
     _pd: PhantomData<A>,
 }
 
-impl<A: Angle> Debug for Euler<A> {
+impl<A: Angle, F: Float> Debug for Euler<A, F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Euler")
             .field("yaw", &self.yaw)
@@ -33,7 +38,7 @@ impl<A: Angle> Debug for Euler<A> {
     }
 }
 
-impl<A: Angle> Euler<A> {
+impl<A: Angle, F: Float> Euler<A, F> {
     /// Creates new euler angles from `yaw`, `pitch`, `roll`.
     pub fn new(yaw: F, pitch: F, roll: F) -> Self {
         Self {
@@ -45,9 +50,9 @@ impl<A: Angle> Euler<A> {
     }
 }
 
-impl Euler<Rad> {
+impl<F: Float> Euler<Rad, F> {
     /// Converts radians to degrees.
-    pub fn to_degrees(self) -> Euler<Deg> {
+    pub fn to_degrees(self) -> Euler<Deg, F> {
         Euler {
             yaw: self.yaw.to_degrees(),
             pitch: self.pitch.to_degrees(),
@@ -57,9 +62,9 @@ impl Euler<Rad> {
     }
 }
 
-impl Euler<Deg> {
+impl<F: Float> Euler<Deg, F> {
     /// Converts degrees to radians.
-    pub fn to_radians(self) -> Euler<Rad> {
+    pub fn to_radians(self) -> Euler<Rad, F> {
         Euler {
             yaw: self.yaw.to_radians(),
             pitch: self.pitch.to_radians(),
@@ -69,7 +74,7 @@ impl Euler<Deg> {
     }
 }
 
-impl<A: Angle> Add for Euler<A> {
+impl<A: Angle, F: Float> Add for Euler<A, F> {
     type Output = Self;
 
     #[inline]
@@ -83,7 +88,7 @@ impl<A: Angle> Add for Euler<A> {
     }
 }
 
-impl<A: Angle> AddAssign for Euler<A> {
+impl<A: Angle, F: Float> AddAssign for Euler<A, F> {
     #[inline]
     fn add_assign(&mut self, rhs: Self) {
         self.yaw += rhs.yaw;
@@ -92,7 +97,7 @@ impl<A: Angle> AddAssign for Euler<A> {
     }
 }
 
-impl<A: Angle> Sub for Euler<A> {
+impl<A: Angle, F: Float> Sub for Euler<A, F> {
     type Output = Self;
 
     #[inline]
@@ -106,7 +111,7 @@ impl<A: Angle> Sub for Euler<A> {
     }
 }
 
-impl<A: Angle> SubAssign for Euler<A> {
+impl<A: Angle, F: Float> SubAssign for Euler<A, F> {
     #[inline]
     fn sub_assign(&mut self, rhs: Self) {
         self.yaw -= rhs.yaw;
@@ -115,7 +120,7 @@ impl<A: Angle> SubAssign for Euler<A> {
     }
 }
 
-impl<A: Angle> Mul<F> for Euler<A> {
+impl<A: Angle, F: Float> Mul<F> for Euler<A, F> {
     type Output = Self;
 
     #[inline]
@@ -129,7 +134,7 @@ impl<A: Angle> Mul<F> for Euler<A> {
     }
 }
 
-impl<A: Angle> MulAssign<F> for Euler<A> {
+impl<A: Angle, F: Float> MulAssign<F> for Euler<A, F> {
     #[inline]
     fn mul_assign(&mut self, rhs: F) {
         self.yaw *= rhs;
@@ -138,7 +143,7 @@ impl<A: Angle> MulAssign<F> for Euler<A> {
     }
 }
 
-impl<A: Angle> Div<F> for Euler<A> {
+impl<A: Angle, F: Float> Div<F> for Euler<A, F> {
     type Output = Self;
 
     #[inline]
@@ -152,7 +157,7 @@ impl<A: Angle> Div<F> for Euler<A> {
     }
 }
 
-impl<A: Angle> DivAssign<F> for Euler<A> {
+impl<A: Angle, F: Float> DivAssign<F> for Euler<A, F> {
     #[inline]
     fn div_assign(&mut self, rhs: F) {
         self.yaw /= rhs;
@@ -161,7 +166,7 @@ impl<A: Angle> DivAssign<F> for Euler<A> {
     }
 }
 
-impl<A: Angle> Neg for Euler<A> {
+impl<A: Angle, F: Float> Neg for Euler<A, F> {
     type Output = Self;
 
     #[inline]

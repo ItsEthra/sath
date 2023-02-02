@@ -1,8 +1,8 @@
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __impl_planar_ops {
-    ($s:ident, $([$f:ident, $i:tt, $t:ident]),*) => {
-        impl $s {
+    ($s:ident, $([$f:ident, $i:tt, $t:tt]),*) => {
+        impl<F: $crate::Float> $s<F> {
             /// Creates new from individual components.
             #[inline]
             pub const fn new($($f: $t),*) -> Self {
@@ -13,7 +13,7 @@ macro_rules! __impl_planar_ops {
 
             /// Creates new with all components equal to `val`.
             #[inline]
-            pub const fn same(val: $crate::FloatType) -> Self {
+            pub const fn same(val: F) -> Self {
                 Self {
                     $($f: val),*
                 }
@@ -37,7 +37,7 @@ macro_rules! __impl_planar_ops {
 
             /// Multiplies all components by `factor`.
             #[inline]
-            pub fn scale(&mut self, factor: $crate::FloatType) {
+            pub fn scale(&mut self, factor: F) {
                 $(
                     self.$f *= factor;
                 )*
@@ -45,7 +45,7 @@ macro_rules! __impl_planar_ops {
 
             /// Returns the scaled copy. See [`Self::scale`].
             #[inline]
-            pub fn scaled(self, factor: $crate::FloatType) -> Self {
+            pub fn scaled(self, factor: F) -> Self {
                 Self {
                     $(
                         $f: self.$f * factor
@@ -55,13 +55,13 @@ macro_rules! __impl_planar_ops {
 
             /// Returns squared magnitude.
             #[inline]
-            pub fn sqr_magnitude(&self) -> $crate::FloatType {
-                $(self.$f * self.$f +)* 0.
+            pub fn sqr_magnitude(&self) -> F {
+                $(self.$f * self.$f +)* F::ZERO
             }
 
             /// Returns magnitude.
             #[inline]
-            pub fn magnitude(&self) -> $crate::FloatType {
+            pub fn magnitude(&self) -> F {
                 self.sqr_magnitude().sqrt()
             }
 
@@ -85,15 +85,15 @@ macro_rules! __impl_planar_ops {
                 }
             }
 
-            /// Returns a copy where all components are clamped between `from` and `to`.
-            #[inline]
-            pub fn clamp(&self, from: $crate::FloatType, to: $crate::FloatType) -> Self {
-                Self {
-                    $(
-                        $f: self.$f.clamp(from, to)
-                    ),*
-                }
-            }
+            // Returns a copy where all components are clamped between `from` and `to`.
+            // #[inline]
+            // pub fn clamp(&self, from: F, to: F) -> Self {
+            //     Self {
+            //         $(
+            //             $f: self.$f.clamp(from, to)
+            //         ),*
+            //     }
+            // }
 
             /// Returns a copy where all components are posivive.
             #[inline]
@@ -114,7 +114,7 @@ macro_rules! __impl_planar_ops {
             }
         }
 
-        impl core::convert::From<($($t),*)> for $s {
+        impl<F: Float> core::convert::From<($($t),*)> for $s<F> {
             #[inline]
             fn from(val: ($($t),*)) -> Self {
                 Self {
@@ -125,16 +125,16 @@ macro_rules! __impl_planar_ops {
             }
         }
 
-        impl core::convert::From<$s> for ($($t),*) {
+        impl<F: Float> core::convert::From<$s<F>> for ($($t),*) {
             #[inline]
-            fn from(val: $s) -> Self {
+            fn from(val: $s<F>) -> Self {
                 ($(
                     val.$f
                 ),*)
             }
         }
 
-        impl core::ops::Add for $s {
+        impl<F: Float> core::ops::Add for $s<F> {
             type Output = Self;
 
             #[inline]
@@ -147,7 +147,7 @@ macro_rules! __impl_planar_ops {
             }
         }
 
-        impl core::ops::AddAssign for $s {
+        impl<F: Float> core::ops::AddAssign for $s<F> {
             #[inline]
             fn add_assign(&mut self, rhs: Self) {
                 $(
@@ -156,7 +156,7 @@ macro_rules! __impl_planar_ops {
             }
         }
 
-        impl core::ops::Sub for $s {
+        impl<F: Float> core::ops::Sub for $s<F> {
             type Output = Self;
 
             #[inline]
@@ -169,7 +169,7 @@ macro_rules! __impl_planar_ops {
             }
         }
 
-        impl core::ops::SubAssign for $s {
+        impl<F: Float> core::ops::SubAssign for $s<F> {
             #[inline]
             fn sub_assign(&mut self, rhs: Self) {
                 $(
@@ -178,11 +178,11 @@ macro_rules! __impl_planar_ops {
             }
         }
 
-        impl core::ops::Mul<$crate::FloatType> for $s {
+        impl<F: Float> core::ops::Mul<F> for $s<F> {
             type Output = Self;
 
             #[inline]
-            fn mul(self, rhs: $crate::FloatType) -> Self {
+            fn mul(self, rhs: F) -> Self {
                 Self {
                     $(
                         $f: self.$f * rhs
@@ -191,20 +191,20 @@ macro_rules! __impl_planar_ops {
             }
         }
 
-        impl core::ops::MulAssign<$crate::FloatType> for $s {
+        impl<F: Float> core::ops::MulAssign<F> for $s<F> {
             #[inline]
-            fn mul_assign(&mut self, rhs: $crate::FloatType) {
+            fn mul_assign(&mut self, rhs: F) {
                 $(
                     self.$f = self.$f * rhs
                 );*
             }
         }
 
-        impl core::ops::Div<$crate::FloatType> for $s {
+        impl<F: Float> core::ops::Div<F> for $s<F> {
             type Output = Self;
 
             #[inline]
-            fn div(self, rhs: $crate::FloatType) -> Self {
+            fn div(self, rhs: F) -> Self {
                 Self {
                     $(
                         $f: self.$f / rhs
@@ -213,16 +213,16 @@ macro_rules! __impl_planar_ops {
             }
         }
 
-        impl core::ops::DivAssign<$crate::FloatType> for $s {
+        impl<F: Float> core::ops::DivAssign<F> for $s<F> {
             #[inline]
-            fn div_assign(&mut self, rhs: $crate::FloatType) {
+            fn div_assign(&mut self, rhs: F) {
                 $(
                     self.$f = self.$f / rhs
                 );*
             }
         }
 
-        impl core::ops::Neg for $s {
+        impl<F: Float> core::ops::Neg for $s<F> {
             type Output = Self;
 
             #[inline]
@@ -241,12 +241,12 @@ macro_rules! __impl_planar_ops {
 #[macro_export]
 macro_rules! __impl_mat_ops {
     ($mat:ident, $rowtype:ident, $dim:expr, $($r:ident),*) => {
-        impl $mat {
+        impl<F: Float> $mat<F> {
             /// Inverses matrix in place.
             /// # Panics
             /// If the determinant is `0`.
             pub fn inverse(&mut self) {
-                assert!(self.det().abs() > $crate::FloatType::EPSILON, "Determinant is 0");
+                assert!(self.det().abs() > F::EPSILON, "Determinant is 0");
 
                 let mut i = Self::IDENTITY;
                 self.row_echelon_reduced(&mut i);
@@ -257,7 +257,7 @@ macro_rules! __impl_mat_ops {
             /// # Panics
             /// If the determinant is `0`.
             pub fn inversed(&self) -> Self {
-                assert!(self.det().abs() > $crate::FloatType::EPSILON, "Determinant is 0");
+                assert!(self.det().abs() > F::EPSILON, "Determinant is 0");
 
                 let mut i = Self::IDENTITY;
                 self.clone().row_echelon_reduced(&mut i);
@@ -303,8 +303,8 @@ macro_rules! __impl_mat_ops {
                 );
 
                 std::mem::swap(
-                    unsafe { &mut *(self as *mut _ as *mut $rowtype).add(i - 1) },
-                    unsafe { &mut *(self as *mut _ as *mut $rowtype).add(j - 1) },
+                    unsafe { &mut *(self as *mut _ as *mut $rowtype<F>).add(i - 1) },
+                    unsafe { &mut *(self as *mut _ as *mut $rowtype<F>).add(j - 1) },
                 );
             }
 
@@ -325,10 +325,11 @@ macro_rules! __impl_mat_ops {
                         for i in (h + 1)..$dim {
                             let f = self[i][k] / self[h][k];
 
-                            self[i][k] = 0.;
+                            self[i][k] = F::ZERO;
 
                             for j in (k + 1)..$dim {
-                                self[i][j] -= self[h][j] * f;
+                                let delta = self[h][j] * f;
+                                self[i][j] -= delta;
                             }
                         }
 
@@ -347,7 +348,7 @@ macro_rules! __impl_mat_ops {
                     }
 
                     let mut i = r;
-                    while self[i][lead] == 0. {
+                    while self[i][lead] == F::ZERO {
                         i += 1;
 
                         if $dim == i {
@@ -387,33 +388,33 @@ macro_rules! __impl_mat_ops {
         }
 
         #[allow(clippy::int_plus_one)]
-        impl core::ops::Index<usize> for $mat {
-            type Output = $rowtype;
+        impl<F: Float> core::ops::Index<usize> for $mat<F> {
+            type Output = $rowtype<F>;
 
             #[inline]
             fn index(&self, idx: usize) -> &Self::Output {
                 assert!(idx <= $dim - 1);
 
-                unsafe { &*(self as *const _ as *const $crate::$rowtype).add(idx) }
+                unsafe { &*(self as *const _ as *const $crate::$rowtype<F>).add(idx) }
             }
         }
 
         #[allow(clippy::int_plus_one)]
-        impl core::ops::IndexMut<usize> for $mat {
+        impl<F: Float> core::ops::IndexMut<usize> for $mat<F> {
             #[inline]
             fn index_mut(&mut self, idx: usize) -> &mut Self::Output {
                 assert!(idx <= $dim - 1);
 
-                unsafe { &mut *(self as *mut _ as *mut $crate::$rowtype).add(idx) }
+                unsafe { &mut *(self as *mut _ as *mut $crate::$rowtype<F>).add(idx) }
             }
         }
 
-        impl core::ops::Add for $mat {
+        impl<F: Float> core::ops::Add for $mat<F> {
             type Output = Self;
 
             #[inline]
             fn add(self, rhs: Self) -> Self::Output {
-                $mat {
+                $mat::<F> {
                     $(
                         $r: self.$r + rhs.$r
                     ),*
@@ -421,7 +422,7 @@ macro_rules! __impl_mat_ops {
             }
         }
 
-        impl core::ops::AddAssign for $mat {
+        impl<F: Float> core::ops::AddAssign for $mat<F> {
             #[inline]
             fn add_assign(&mut self, rhs: Self) {
                 $(
@@ -430,12 +431,12 @@ macro_rules! __impl_mat_ops {
             }
         }
 
-        impl core::ops::Sub for $mat {
+        impl<F: Float> core::ops::Sub for $mat<F> {
             type Output = Self;
 
             #[inline]
             fn sub(self, rhs: Self) -> Self::Output {
-                $mat {
+                $mat::<F> {
                     $(
                         $r: self.$r - rhs.$r
                     ),*
@@ -443,7 +444,7 @@ macro_rules! __impl_mat_ops {
             }
         }
 
-        impl core::ops::SubAssign for $mat {
+        impl<F: Float> core::ops::SubAssign for $mat<F> {
             #[inline]
             fn sub_assign(&mut self, rhs: Self) {
                 $(
@@ -452,12 +453,12 @@ macro_rules! __impl_mat_ops {
             }
         }
 
-        impl core::ops::Mul<$crate::FloatType> for $mat {
+        impl<F: Float> core::ops::Mul<F> for $mat<F> {
             type Output = Self;
 
             #[inline]
             fn mul(self, rhs: F) -> Self::Output {
-                $mat {
+                $mat::<F> {
                     $(
                         $r: self.$r * rhs
                     ),*
@@ -465,7 +466,7 @@ macro_rules! __impl_mat_ops {
             }
         }
 
-        impl core::ops::MulAssign<F> for $mat {
+        impl<F: Float> core::ops::MulAssign<F> for $mat<F> {
             #[inline]
             fn mul_assign(&mut self, rhs: F) {
                 $(
@@ -474,12 +475,12 @@ macro_rules! __impl_mat_ops {
             }
         }
 
-        impl core::ops::Div<F> for $mat {
+        impl<F: Float> core::ops::Div<F> for $mat<F> {
             type Output = Self;
 
             #[inline]
             fn div(self, rhs: F) -> Self::Output {
-                $mat {
+                $mat::<F> {
                     $(
                         $r: self.$r / rhs
                     ),*
@@ -487,7 +488,7 @@ macro_rules! __impl_mat_ops {
             }
         }
 
-        impl core::ops::DivAssign<F> for $mat {
+        impl<F: Float> core::ops::DivAssign<F> for $mat<F> {
             #[inline]
             fn div_assign(&mut self, rhs: F) {
                 $(
@@ -502,27 +503,27 @@ macro_rules! __impl_mat_ops {
 #[macro_export]
 macro_rules! __impl_vec_ops {
     ($vec:ident, $dim:expr, $($c:ident),*) => {
-        impl core::ops::Index<usize> for $vec {
+        impl<F: Float> core::ops::Index<usize> for $vec<F> {
             type Output = F;
 
             #[inline]
             fn index(&self, index: usize) -> &Self::Output {
                 assert!(index <= $dim);
 
-                unsafe { &*(self as *const _ as *const $crate::FloatType).add(index) }
+                unsafe { &*(self as *const _ as *const F).add(index) }
             }
         }
 
-        impl core::ops::IndexMut<usize> for $vec {
+        impl<F: Float> core::ops::IndexMut<usize> for $vec<F> {
             #[inline]
             fn index_mut(&mut self, index: usize) -> &mut Self::Output {
                 assert!(index <= $dim);
 
-                unsafe { &mut *(self as *mut _ as *mut $crate::FloatType).add(index) }
+                unsafe { &mut *(self as *mut _ as *mut F).add(index) }
             }
         }
 
-        impl $vec {
+        impl<F: Float> $vec<F> {
             /// Normalizes vector, preserving directing and making its magnitude equal to `1`.
             #[inline]
             pub fn normalize(&mut self) {
@@ -547,45 +548,45 @@ macro_rules! __impl_vec_ops {
 
             /// Converts the vector to an array.
             #[inline]
-            pub fn to_array(&self) -> [$crate::FloatType; $dim + 1] {
-                unsafe { std::mem::transmute(*self) }
+            pub fn to_array(&self) -> [F; $dim + 1] {
+                unsafe { std::mem::transmute_copy(self) }
             }
 
             /// Converts array to a vector.
             #[inline]
-            pub fn from_array(array: [$crate::FloatType; $dim + 1]) -> Self {
-                unsafe { std::mem::transmute(array) }
+            pub fn from_array(array: [F; $dim + 1]) -> Self {
+                unsafe { std::mem::transmute_copy(&array) }
             }
 
             /// Converts the vector to an array slice.
             #[inline]
-            pub fn as_array(&self) -> &[$crate::FloatType; $dim + 1] {
-                unsafe { std::mem::transmute(self) }
+            pub fn as_array(&self) -> &[F; $dim + 1] {
+                unsafe { std::mem::transmute_copy(&self) }
             }
 
             /// Converts the vector to a mutable array slice.
             #[inline]
-            pub fn as_array_mut<'a>(&'a mut self) -> &'a [$crate::FloatType; $dim + 1] {
-                unsafe { std::mem::transmute(self) }
+            pub fn as_array_mut<'a>(&'a mut self) -> &'a [F; $dim + 1] {
+                unsafe { std::mem::transmute_copy(&self) }
             }
 
             /// Computes the dot(scalar) product between two vectors.
             /// Dot product for two normalized vector is equal to the cosine of the angle between
             /// them.
             #[inline]
-            pub fn dot(&self, other: Self) -> $crate::FloatType {
-                $(self.$c * other.$c +)* 0.
+            pub fn dot(&self, other: Self) -> F {
+                $(self.$c * other.$c +)* F::ZERO
             }
 
             /// Computes the dot product between two vectors normalizing them beforehand.
             #[inline]
-            pub fn dot_normalized(&self, other: Self) -> $crate::FloatType {
+            pub fn dot_normalized(&self, other: Self) -> F {
                 self.normalized().dot(other.normalized())
             }
 
             /// Returns angle in radians between two vectors. Output range is: `[0, pi]`.
             #[inline]
-            pub fn angle_to(&self, other: Self) -> $crate::FloatType {
+            pub fn angle_to(&self, other: Self) -> F {
                 self.dot_normalized(other).acos()
             }
 
@@ -610,15 +611,15 @@ macro_rules! __impl_vec_ops {
             ///         ~- . ___ . -~    */
             /// ```
             #[inline]
-            pub fn arc_angle_to(&self, other: Self) -> $crate::FloatType {
+            pub fn arc_angle_to(&self, other: Self) -> F {
                 let (v1, v2) = (self.normalized(), other.normalized());
 
                 let dot = v1.dot(v2);
                 let det = v1.x * v2.y - v1.y * v2.x;
 
                 let mut ang = det.atan2(dot);
-                if ang < 0. {
-                    ang += $crate::PI * 2.
+                if ang < F::ZERO {
+                    ang += F::PI * F::TWO
                 }
 
                 ang
@@ -679,7 +680,7 @@ macro_rules! __impl_vec_ops {
             pub fn slerp(self, end: Self, t: F) -> Self {
                 let omega = self.dot_normalized(end).acos();
 
-                self * (((1.0 - t) * omega).sin() / omega.sin())
+                self * (((F::ONE - t) * omega).sin() / omega.sin())
                     + end * ((t * omega).sin() / omega.sin())
             }
 
@@ -688,7 +689,7 @@ macro_rules! __impl_vec_ops {
             pub fn product(&self) -> F {
                 $(
                     self.$c *
-                )* 1.
+                )* F::ONE
             }
 
             /// Computes the sum of all elements in the vector.
@@ -696,7 +697,7 @@ macro_rules! __impl_vec_ops {
             pub fn sum(&self) -> F {
                 $(
                     self.$c +
-                )* 0.
+                )* F::ZERO
             }
         }
     };

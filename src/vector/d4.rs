@@ -1,49 +1,46 @@
-use crate::{vector, FloatType as F, Vector3};
 use std::cmp::Ordering;
+
+use crate::{Float, Vector3};
 
 /// 4 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
-pub struct Vector4 {
+pub struct Vector4<F: Float> {
     pub x: F,
     pub y: F,
     pub z: F,
     pub w: F,
 }
 
-impl Vector4 {
-    pub const X: Self = vector!(1, 0, 0, 0);
-    pub const Y: Self = vector!(0, 1, 0, 0);
-    pub const Z: Self = vector!(0, 0, 1, 0);
-    pub const W: Self = vector!(0, 0, 0, 1);
+impl<F: Float> Vector4<F> {
+    pub const ZERO: Self = Self::new(F::ZERO, F::ZERO, F::ZERO, F::ZERO);
+    pub const ONE: Self = Self::new(F::ONE, F::ONE, F::ONE, F::ONE);
 
-    pub const XY: Self = vector!(1, 1, 0, 0);
-    pub const XZ: Self = vector!(1, 0, 1, 0);
-    pub const XW: Self = vector!(1, 0, 0, 1);
+    pub const X: Self = Self::new(F::ONE, F::ZERO, F::ZERO, F::ZERO);
+    pub const Y: Self = Self::new(F::ZERO, F::ONE, F::ZERO, F::ZERO);
+    pub const Z: Self = Self::new(F::ZERO, F::ZERO, F::ONE, F::ZERO);
+    pub const W: Self = Self::new(F::ZERO, F::ZERO, F::ZERO, F::ONE);
 
-    pub const YZ: Self = vector!(0, 1, 1, 0);
-    pub const YW: Self = vector!(0, 1, 0, 1);
+    pub const XY: Self = Self::new(F::ONE, F::ONE, F::ZERO, F::ZERO);
+    pub const XZ: Self = Self::new(F::ONE, F::ZERO, F::ONE, F::ZERO);
+    pub const XW: Self = Self::new(F::ONE, F::ZERO, F::ZERO, F::ONE);
 
-    pub const ZW: Self = vector!(0, 0, 1, 1);
+    pub const YZ: Self = Self::new(F::ZERO, F::ONE, F::ONE, F::ZERO);
+    pub const YW: Self = Self::new(F::ZERO, F::ONE, F::ZERO, F::ONE);
 
-    pub const XYZ: Self = vector!(1, 1, 1, 0);
-    pub const XYW: Self = vector!(1, 1, 0, 1);
-    pub const XZW: Self = vector!(1, 0, 1, 1);
-    pub const YZW: Self = vector!(0, 1, 1, 1);
+    pub const ZW: Self = Self::new(F::ZERO, F::ZERO, F::ONE, F::ONE);
 
-    pub const XYZW: Self = vector!(1, 1, 1, 1);
+    pub const XYZ: Self = Self::new(F::ONE, F::ONE, F::ONE, F::ZERO);
+    pub const XYW: Self = Self::new(F::ONE, F::ONE, F::ZERO, F::ONE);
+    pub const XZW: Self = Self::new(F::ONE, F::ZERO, F::ONE, F::ONE);
+    pub const YZW: Self = Self::new(F::ZERO, F::ONE, F::ONE, F::ONE);
+
+    pub const XYZW: Self = Self::new(F::ONE, F::ONE, F::ONE, F::ONE);
 }
 
-impl Vector4 {
-    /// All elements are `0`.
-    pub const ZERO: Self = vector!(0, 0, 0, 0);
-    /// All elements are `1`.
-    pub const ONE: Self = vector!(1, 1, 1, 1);
-}
-
-impl Vector4 {
+impl<F: Float> Vector4<F> {
     /// Truncates vector to [`Vector3`], removing `w` component.
-    pub const fn truncate(self) -> Vector3 {
+    pub const fn truncate(self) -> Vector3<F> {
         Vector3 {
             x: self.x,
             y: self.y,
@@ -86,8 +83,8 @@ impl Vector4 {
     }
 }
 
-unsafe impl bytemuck::Pod for Vector4 {}
-unsafe impl bytemuck::Zeroable for Vector4 {}
+unsafe impl<F: Float> bytemuck::Pod for Vector4<F> {}
+unsafe impl<F: Float> bytemuck::Zeroable for Vector4<F> {}
 
 crate::__impl_vec_ops!(Vector4, 3, x, y, z, w);
 crate::__impl_planar_ops!(Vector4, [x, 0, F], [y, 1, F], [z, 2, F], [w, 3, F]);

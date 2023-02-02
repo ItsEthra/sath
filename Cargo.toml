@@ -1,5 +1,6 @@
 [package]
 name = "sath"
+description = "Toy math library"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"

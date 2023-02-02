@@ -1,16 +1,16 @@
-use crate::{FloatType as F, Matrix2, Vector2};
+use crate::{Float, Matrix2, Vector2};
 use std::ops::{Div, DivAssign, Mul, MulAssign};
 
 /// Complex number
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Complex {
+pub struct Complex<F: Float> {
     pub real: F,
     pub imag: F,
 }
 
-impl Complex {
+impl<F: Float> Complex<F> {
     /// Converts complex number to a vector where `x` = `real`, `y` = `imag`.
-    pub const fn to_vector2(self) -> Vector2 {
+    pub const fn to_vector2(self) -> Vector2<F> {
         Vector2 {
             x: self.real,
             y: self.imag,
@@ -18,7 +18,7 @@ impl Complex {
     }
 
     /// Converts vector to a complex number where `real` = `x`, `imag` = `y`.
-    pub const fn from_vector2(vec: Vector2) -> Self {
+    pub const fn from_vector2(vec: Vector2<F>) -> Self {
         Self {
             real: vec.x,
             imag: vec.y,
@@ -27,7 +27,7 @@ impl Complex {
 
     /// Converts complex number to a real matrix.
     #[inline]
-    pub fn to_matrix2(self) -> Matrix2 {
+    pub fn to_matrix2(self) -> Matrix2<F> {
         Matrix2::new(self.real, -self.imag, self.imag, self.real)
     }
 
@@ -102,7 +102,7 @@ impl Complex {
     }
 }
 
-impl Mul for Complex {
+impl<F: Float> Mul for Complex<F> {
     type Output = Self;
 
     #[inline]
@@ -114,7 +114,7 @@ impl Mul for Complex {
     }
 }
 
-impl MulAssign for Complex {
+impl<F: Float> MulAssign for Complex<F> {
     #[inline]
     fn mul_assign(&mut self, rhs: Self) {
         self.real = self.real * rhs.real - self.imag * rhs.imag;
@@ -123,7 +123,7 @@ impl MulAssign for Complex {
 }
 
 #[allow(clippy::suspicious_arithmetic_impl)]
-impl Div for Complex {
+impl<F: Float> Div for Complex<F> {
     type Output = Self;
 
     #[inline]
@@ -133,24 +133,22 @@ impl Div for Complex {
 }
 
 #[allow(clippy::suspicious_op_assign_impl)]
-impl DivAssign for Complex {
+impl<F: Float> DivAssign for Complex<F> {
     #[inline]
     fn div_assign(&mut self, rhs: Self) {
         *self *= rhs.reciprocal();
     }
 }
 
-impl From<Vector2> for Complex {
+impl<F: Float> From<Vector2<F>> for Complex<F> {
     #[inline]
-    fn from(val: Vector2) -> Self {
+    fn from(val: Vector2<F>) -> Self {
         Self {
             real: val.x,
             imag: val.y,
         }
     }
 }
-
-crate::__impl_planar_ops!(Complex, [real, 0, F], [imag, 1, F]);
 
 /// Creates new complex number where `real` = first argument and `imag` = second argument.
 #[macro_export]

@@ -1,4 +1,4 @@
-use crate::{Aspect, FloatType as F, Vector3, Vector4};
+use crate::{Aspect, Float, Vector3, Vector4};
 use std::{
     fmt,
     mem::swap,
@@ -7,37 +7,14 @@ use std::{
 
 /// Row major 4x4 matrix.
 #[derive(Clone, Copy, PartialEq)]
-pub struct Matrix4 {
-    pub row1: Vector4,
-    pub row2: Vector4,
-    pub row3: Vector4,
-    pub row4: Vector4,
+pub struct Matrix4<F: Float> {
+    pub row1: Vector4<F>,
+    pub row2: Vector4<F>,
+    pub row3: Vector4<F>,
+    pub row4: Vector4<F>,
 }
 
-impl Matrix4 {
-    pub const ZERO: Self = Self {
-        row1: Vector4::ZERO,
-        row2: Vector4::ZERO,
-        row3: Vector4::ZERO,
-        row4: Vector4::ZERO,
-    };
-
-    pub const ONE: Self = Self {
-        row1: Vector4::ONE,
-        row2: Vector4::ONE,
-        row3: Vector4::ONE,
-        row4: Vector4::ONE,
-    };
-
-    pub const IDENTITY: Self = Self {
-        row1: Vector4::new(1., 0., 0., 0.),
-        row2: Vector4::new(0., 1., 0., 0.),
-        row3: Vector4::new(0., 0., 1., 0.),
-        row4: Vector4::new(0., 0., 0., 1.),
-    };
-}
-
-impl Matrix4 {
+impl<F: Float> Matrix4<F> {
     #[rustfmt::skip]
     #[allow(clippy::too_many_arguments)]
     pub const fn new(
@@ -55,7 +32,7 @@ impl Matrix4 {
     }
 
     /// Creates new matrix where diagonal entries set to the elements of the vector.
-    pub const fn new_diagonal(diag: Vector4) -> Self {
+    pub const fn new_diagonal(diag: Vector4<F>) -> Self {
         Self {
             row1: Vector4::new(diag.x, 0., 0., 0.),
             row2: Vector4::new(0., diag.y, 0., 0.),
@@ -95,7 +72,7 @@ impl Matrix4 {
     }
 
     /// Creates new matrix that represents translation in 3D space.
-    pub const fn new_translation(translation: Vector3) -> Self {
+    pub const fn new_translation(translation: Vector3<F>) -> Self {
         let mut m = Self::IDENTITY;
         m.row1.w = translation.x;
         m.row2.w = translation.y;
@@ -104,7 +81,12 @@ impl Matrix4 {
     }
 
     /// Creates a matrix from individual rows.
-    pub const fn from_rows(row1: Vector4, row2: Vector4, row3: Vector4, row4: Vector4) -> Self {
+    pub const fn from_rows(
+        row1: Vector4<F>,
+        row2: Vector4<F>,
+        row3: Vector4<F>,
+        row4: Vector4<F>,
+    ) -> Self {
         Self {
             row1,
             row2,
@@ -114,7 +96,12 @@ impl Matrix4 {
     }
 
     /// Creates a matrix from individual columns.
-    pub const fn from_columns(col1: Vector4, col2: Vector4, col3: Vector4, col4: Vector4) -> Self {
+    pub const fn from_columns(
+        col1: Vector4<F>,
+        col2: Vector4<F>,
+        col3: Vector4<F>,
+        col4: Vector4<F>,
+    ) -> Self {
         Self {
             row1: Vector4::new(col1.x, col2.x, col3.x, col4.x),
             row2: Vector4::new(col1.y, col2.y, col3.y, col4.y),
@@ -126,7 +113,7 @@ impl Matrix4 {
     /// Returns the nth row.
     /// # Panics
     /// If `n` is not 1, 2, 3 or 4.
-    pub const fn row(&self, n: usize) -> Vector4 {
+    pub const fn row(&self, n: usize) -> Vector4<F> {
         match n {
             1 => self.row1,
             2 => self.row2,
@@ -139,7 +126,7 @@ impl Matrix4 {
     /// Sets the nth row.
     /// # Panics
     /// If `n` is not 1, 2, 3 or 4.
-    pub fn set_row(&mut self, n: usize, row: Vector4) {
+    pub fn set_row(&mut self, n: usize, row: Vector4<F>) {
         match n {
             1 => self.row1 = row,
             2 => self.row2 = row,
@@ -152,7 +139,7 @@ impl Matrix4 {
     /// Returns the nth column.
     /// # Panics
     /// If `n` is not 1, 2, 3 or 4.
-    pub const fn column(&self, n: usize) -> Vector4 {
+    pub const fn column(&self, n: usize) -> Vector4<F> {
         match n {
             1 => Vector4::new(self.row1.x, self.row2.x, self.row3.x, self.row4.x),
             2 => Vector4::new(self.row1.y, self.row2.y, self.row3.y, self.row4.y),
@@ -165,7 +152,7 @@ impl Matrix4 {
     /// Sets the nth column.
     /// # Panics
     /// If `n` is not 1, 2, 3 or 4.
-    pub fn set_column(&mut self, n: usize, column: Vector4) {
+    pub fn set_column(&mut self, n: usize, column: Vector4<F>) {
         match n {
             1 => {
                 self.row1.x = column.x;
@@ -196,7 +183,7 @@ impl Matrix4 {
     }
 
     /// Returns matrix's diagonal.
-    pub const fn diagonal(&self) -> Vector4 {
+    pub const fn diagonal(&self) -> Vector4<F> {
         Vector4 {
             x: self.row1.x,
             y: self.row2.y,
@@ -206,7 +193,7 @@ impl Matrix4 {
     }
 
     /// Sets matrix's diagonal.
-    pub fn set_diagonal(&mut self, new: Vector4) {
+    pub fn set_diagonal(&mut self, new: Vector4<F>) {
         self.row1.x = new.x;
         self.row2.y = new.y;
         self.row3.z = new.z;
@@ -239,7 +226,7 @@ impl Matrix4 {
     }
 }
 
-impl Mul for Matrix4 {
+impl<F: Float> Mul for Matrix4<F> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
@@ -272,7 +259,7 @@ impl Mul for Matrix4 {
     }
 }
 
-impl MulAssign for Matrix4 {
+impl<F: Float> MulAssign for Matrix4<F> {
     fn mul_assign(&mut self, rhs: Self) {
         self.row1 = Vector4 {
             x: self.row1.dot(rhs.column(1)),
@@ -301,10 +288,10 @@ impl MulAssign for Matrix4 {
     }
 }
 
-impl Mul<Vector4> for Matrix4 {
-    type Output = Vector4;
+impl<F: Float> Mul<Vector4<F>> for Matrix4<F> {
+    type Output = Vector4<F>;
 
-    fn mul(self, rhs: Vector4) -> Self::Output {
+    fn mul(self, rhs: Vector4<F>) -> Self::Output {
         Vector4 {
             x: self.row1.dot(rhs),
             y: self.row2.dot(rhs),
@@ -314,7 +301,7 @@ impl Mul<Vector4> for Matrix4 {
     }
 }
 
-impl fmt::Debug for Matrix4 {
+impl<F: Float> fmt::Debug for Matrix4<F> {
     #[rustfmt::skip]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
@@ -328,13 +315,11 @@ impl fmt::Debug for Matrix4 {
     }
 }
 
-impl Default for Matrix4 {
+impl<F: Float> Default for Matrix4<F> {
     fn default() -> Self {
         Self::IDENTITY
     }
 }
 
-unsafe impl bytemuck::Pod for Matrix4 {}
-unsafe impl bytemuck::Zeroable for Matrix4 {}
-
-crate::__impl_mat_ops!(Matrix4, Vector4, 4, row1, row2, row3, row4);
+unsafe impl<F: Float> bytemuck::Pod for Matrix4<F> {}
+unsafe impl<F: Float> bytemuck::Zeroable for Matrix4<F> {}

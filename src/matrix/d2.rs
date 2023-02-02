@@ -1,4 +1,4 @@
-use crate::{Complex, FloatType as F, Matrix3, Vector2};
+use crate::{Complex, Float, Matrix3, Vector2};
 use std::{
     fmt::{self, Debug},
     mem::swap,
@@ -7,23 +7,14 @@ use std::{
 
 /// Row major 2x2 matrix.
 #[derive(Clone, Copy, PartialEq)]
-pub struct Matrix2 {
+pub struct Matrix2<F: Float> {
     /// First row.
-    pub row1: Vector2,
+    pub row1: Vector2<F>,
     /// Second row.
-    pub row2: Vector2,
+    pub row2: Vector2<F>,
 }
 
-impl Matrix2 {
-    /// Matrix with all elements equal to `0`.
-    pub const ZERO: Self = Self::new(0., 0., 0., 0.);
-    /// Matrix with all elements equal to `1`.
-    pub const ONE: Self = Self::new(1., 1., 1., 1.);
-    /// Identity matrix with diagonal elements equal to `1` and `0` for every other.
-    pub const IDENTITY: Self = Self::new(1., 0., 0., 1.);
-}
-
-impl Matrix2 {
+impl<F: Float> Matrix2<F> {
     /// Creates a new matrix from individual elements.
     pub const fn new(m11: F, m12: F, m21: F, m22: F) -> Self {
         Matrix2 {
@@ -33,7 +24,7 @@ impl Matrix2 {
     }
 
     /// Creates a new matrix from diagonal vector. All other elements are equal to `0`.
-    pub const fn new_diagonal(diag: Vector2) -> Self {
+    pub const fn new_diagonal(diag: Vector2<F>) -> Self {
         Self {
             row1: Vector2::new(diag.x, 0.),
             row2: Vector2::new(0., diag.y),
@@ -41,7 +32,7 @@ impl Matrix2 {
     }
 
     /// Extends matrix by adding a bottom and right vectors and a corner to form 3x3 matrix.
-    pub const fn extend(&self, bottom: Vector2, right: Vector2, corner: F) -> Matrix3 {
+    pub const fn extend(&self, bottom: Vector2<F>, right: Vector2<F>, corner: F) -> Matrix3<F> {
         Matrix3 {
             row1: self.row1.extend(right.x),
             row2: self.row2.extend(right.y),
@@ -49,19 +40,13 @@ impl Matrix2 {
         }
     }
 
-    /// Expands matrix by adding zero vectors to the bottom and right with `1` in the corner.
-    /// Shortcut for `.extend(Vector2::ZERO, Vector2::ZERO, 1.0)`.
-    pub const fn expand(&self) -> Matrix3 {
-        self.extend(Vector2::ZERO, Vector2::ZERO, 1.)
-    }
-
     /// Creates a matrix from individual rows.
-    pub const fn from_rows(row1: Vector2, row2: Vector2) -> Self {
+    pub const fn from_rows(row1: Vector2<F>, row2: Vector2<F>) -> Self {
         Self { row1, row2 }
     }
 
     /// Creates a matrix from individual columns.
-    pub const fn from_columns(col1: Vector2, col2: Vector2) -> Self {
+    pub const fn from_columns(col1: Vector2<F>, col2: Vector2<F>) -> Self {
         Self {
             row1: Vector2::new(col1.x, col2.x),
             row2: Vector2::new(col1.y, col2.y),
@@ -71,7 +56,7 @@ impl Matrix2 {
     /// Returns the nth row.
     /// # Panics
     /// If `n` is not 1 or 2.
-    pub const fn row(&self, n: usize) -> Vector2 {
+    pub const fn row(&self, n: usize) -> Vector2<F> {
         match n {
             1 => self.row1,
             2 => self.row2,
@@ -82,7 +67,7 @@ impl Matrix2 {
     /// Sets nth row.
     /// # Panics
     /// If `n` is not 1 or 2.
-    pub fn set_row(&mut self, n: usize, row: Vector2) {
+    pub fn set_row(&mut self, n: usize, row: Vector2<F>) {
         match n {
             1 => self.row1 = row,
             2 => self.row2 = row,
@@ -93,7 +78,7 @@ impl Matrix2 {
     /// Returns a nth column.
     /// # Panics
     /// If `n` is not 1 or 2.
-    pub const fn column(&self, n: usize) -> Vector2 {
+    pub const fn column(&self, n: usize) -> Vector2<F> {
         match n {
             1 => Vector2::new(self.row1.x, self.row2.x),
             2 => Vector2::new(self.row1.y, self.row2.y),
@@ -104,7 +89,7 @@ impl Matrix2 {
     /// Sets nth column.
     /// # Panics
     /// If `n` is not 1 or 2.
-    pub fn set_column(&mut self, n: usize, column: Vector2) {
+    pub fn set_column(&mut self, n: usize, column: Vector2<F>) {
         match n {
             1 => {
                 self.row1.x = column.x;
@@ -119,7 +104,7 @@ impl Matrix2 {
     }
 
     /// Returns matrix's diagonal.
-    pub const fn diagonal(&self) -> Vector2 {
+    pub const fn diagonal(&self) -> Vector2<F> {
         Vector2 {
             x: self.row1.x,
             y: self.row2.y,
@@ -127,7 +112,7 @@ impl Matrix2 {
     }
 
     /// Sets matrix's diagonal.
-    pub fn set_diagonal(&mut self, new: Vector2) {
+    pub fn set_diagonal(&mut self, new: Vector2<F>) {
         self.row1.x = new.x;
         self.row2.y = new.y;
     }
@@ -143,7 +128,7 @@ impl Matrix2 {
 
     /// Converts a complex number to a matrix.
     #[inline]
-    pub fn from_complex(cpx: Complex) -> Self {
+    pub fn from_complex(cpx: Complex<F>) -> Self {
         cpx.to_matrix2()
     }
 
@@ -168,7 +153,7 @@ impl Matrix2 {
     }
 }
 
-impl Mul for Matrix2 {
+impl<F: Float> Mul for Matrix2<F> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
@@ -185,7 +170,7 @@ impl Mul for Matrix2 {
     }
 }
 
-impl MulAssign for Matrix2 {
+impl<F: Float> MulAssign for Matrix2<F> {
     fn mul_assign(&mut self, rhs: Self) {
         self.row1 = Vector2 {
             x: self.row1.dot(rhs.column(1)),
@@ -198,16 +183,16 @@ impl MulAssign for Matrix2 {
     }
 }
 
-impl Mul<Vector2> for Matrix2 {
-    type Output = Vector2;
+impl<F: Float> Mul<Vector2<F>> for Matrix2<F> {
+    type Output = Vector2<F>;
 
     #[inline]
-    fn mul(self, rhs: Vector2) -> Self::Output {
+    fn mul(self, rhs: Vector2<F>) -> Self::Output {
         Vector2::new(self.row1.dot(rhs), self.row2.dot(rhs))
     }
 }
 
-impl Debug for Matrix2 {
+impl<F: Float> Debug for Matrix2<F> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -217,13 +202,11 @@ impl Debug for Matrix2 {
     }
 }
 
-impl Default for Matrix2 {
+impl<F: Float> Default for Matrix2<F> {
     fn default() -> Self {
         Self::IDENTITY
     }
 }
 
-unsafe impl bytemuck::Pod for Matrix2 {}
-unsafe impl bytemuck::Zeroable for Matrix2 {}
-
-crate::__impl_mat_ops!(Matrix2, Vector2, 2, row1, row2);
+unsafe impl<F: Float> bytemuck::Pod for Matrix2<F> {}
+unsafe impl<F: Float> bytemuck::Zeroable for Matrix2<F> {}

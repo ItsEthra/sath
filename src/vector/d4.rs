@@ -1,49 +1,24 @@
-use crate::{vector, FloatType as F, Vector3};
+use crate::{Float, Vector3};
 use std::cmp::Ordering;
 
 /// 4 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
-pub struct Vector4 {
+pub struct Vector4<F: Float> {
     pub x: F,
     pub y: F,
     pub z: F,
     pub w: F,
 }
 
-impl Vector4 {
-    pub const X: Self = vector!(1, 0, 0, 0);
-    pub const Y: Self = vector!(0, 1, 0, 0);
-    pub const Z: Self = vector!(0, 0, 1, 0);
-    pub const W: Self = vector!(0, 0, 0, 1);
+impl<F: Float> Vector4<F> {
+    #[inline]
+    pub const fn new(x: F, y: F, z: F, w: F) -> Self {
+        Self { x, y, z, w }
+    }
 
-    pub const XY: Self = vector!(1, 1, 0, 0);
-    pub const XZ: Self = vector!(1, 0, 1, 0);
-    pub const XW: Self = vector!(1, 0, 0, 1);
-
-    pub const YZ: Self = vector!(0, 1, 1, 0);
-    pub const YW: Self = vector!(0, 1, 0, 1);
-
-    pub const ZW: Self = vector!(0, 0, 1, 1);
-
-    pub const XYZ: Self = vector!(1, 1, 1, 0);
-    pub const XYW: Self = vector!(1, 1, 0, 1);
-    pub const XZW: Self = vector!(1, 0, 1, 1);
-    pub const YZW: Self = vector!(0, 1, 1, 1);
-
-    pub const XYZW: Self = vector!(1, 1, 1, 1);
-}
-
-impl Vector4 {
-    /// All elements are `0`.
-    pub const ZERO: Self = vector!(0, 0, 0, 0);
-    /// All elements are `1`.
-    pub const ONE: Self = vector!(1, 1, 1, 1);
-}
-
-impl Vector4 {
     /// Truncates vector to [`Vector3`], removing `w` component.
-    pub const fn truncate(self) -> Vector3 {
+    pub const fn truncate(self) -> Vector3<F> {
         Vector3 {
             x: self.x,
             y: self.y,
@@ -86,8 +61,5 @@ impl Vector4 {
     }
 }
 
-unsafe impl bytemuck::Pod for Vector4 {}
-unsafe impl bytemuck::Zeroable for Vector4 {}
-
-crate::__impl_vec_ops!(Vector4, 3, x, y, z, w);
-crate::__impl_planar_ops!(Vector4, [x, 0, F], [y, 1, F], [z, 2, F], [w, 3, F]);
+unsafe impl<F: Float> bytemuck::Pod for Vector4<F> {}
+unsafe impl<F: Float> bytemuck::Zeroable for Vector4<F> {}

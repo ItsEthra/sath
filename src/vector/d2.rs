@@ -1,38 +1,17 @@
-use crate::{vector, Complex, FloatType as F, Vector3};
+use crate::{Complex, Float, Vector3};
 use std::{cmp::Ordering, ops::Mul};
 
 /// 2 Dimensional vector.
 #[derive(Default, Debug, Clone, Copy, PartialEq, PartialOrd)]
 #[repr(C)]
-pub struct Vector2 {
+pub struct Vector2<F: Float> {
     pub x: F,
     pub y: F,
 }
 
-impl Vector2 {
-    pub const X: Self = vector!(1, 0);
-    pub const Y: Self = vector!(0, 1);
-    pub const XY: Self = vector!(1, 1);
-}
-
-impl Vector2 {
-    /// All elements are `0`.
-    pub const ZERO: Self = vector!(0, 0);
-    /// All elements are `1`.
-    pub const ONE: Self = vector!(1, 1);
-    /// Right: (1, 0)
-    pub const RIGHT: Self = vector!(1, 0);
-    /// Left: (-1, 0)
-    pub const LEFT: Self = vector!(-1, 0);
-    /// Top: (0, 1)
-    pub const UP: Self = vector!(0, 1);
-    /// Down: (0, 1)
-    pub const DOWN: Self = vector!(0, -1);
-}
-
-impl Vector2 {
+impl<F: Float> Vector2<F> {
     /// Converts a vector to a complex number with `real` = `x`, `imag` = `y`.
-    pub const fn to_complex(self) -> Complex {
+    pub const fn to_complex(self) -> Complex<F> {
         Complex {
             real: self.x,
             imag: self.y,
@@ -40,7 +19,7 @@ impl Vector2 {
     }
 
     /// Converts a complex number to a vector with `x` = `real`, `y` = `imag`.
-    pub const fn from_complex(complex: Complex) -> Self {
+    pub const fn from_complex(complex: Complex<F>) -> Self {
         Self {
             x: complex.real,
             y: complex.imag,
@@ -48,7 +27,7 @@ impl Vector2 {
     }
 
     /// Extends the vector with `z` component to create a [`Vector3`].
-    pub const fn extend(self, z: F) -> Vector3 {
+    pub const fn extend(self, z: F) -> Vector3<F> {
         Vector3 {
             x: self.x,
             y: self.y,
@@ -120,9 +99,9 @@ impl Vector2 {
     }
 }
 
-impl From<Complex> for Vector2 {
+impl<F: Float> From<Complex<F>> for Vector2<F> {
     #[inline]
-    fn from(val: Complex) -> Self {
+    fn from(val: Complex<F>) -> Self {
         Self {
             x: val.real,
             y: val.imag,
@@ -130,11 +109,11 @@ impl From<Complex> for Vector2 {
     }
 }
 
-impl Mul<Complex> for Vector2 {
+impl<F: Float> Mul<Complex<F>> for Vector2<F> {
     type Output = Self;
 
     #[inline]
-    fn mul(self, rhs: Complex) -> Self::Output {
+    fn mul(self, rhs: Complex<F>) -> Self::Output {
         Self {
             x: self.x * rhs.real - self.y * rhs.imag,
             y: self.x * rhs.imag + self.y * rhs.real,
@@ -142,8 +121,5 @@ impl Mul<Complex> for Vector2 {
     }
 }
 
-unsafe impl bytemuck::Pod for Vector2 {}
-unsafe impl bytemuck::Zeroable for Vector2 {}
-
-crate::__impl_vec_ops!(Vector2, 1, x, y);
-crate::__impl_planar_ops!(Vector2, [x, 0, F], [y, 1, F]);
+unsafe impl<F: Float> bytemuck::Pod for Vector2<F> {}
+unsafe impl<F: Float> bytemuck::Zeroable for Vector2<F> {}

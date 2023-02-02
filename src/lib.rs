@@ -11,14 +11,12 @@ mod vector;
 pub use vector::*;
 mod complex;
 pub use complex::*;
-mod affine;
-pub use affine::*;
-mod aspect;
-pub use aspect::*;
 mod euler;
 pub use euler::*;
 mod angle;
 pub use angle::*;
+mod float;
+pub use float::*;
 
 /// Type of float used.
 #[cfg(not(feature = "use-f64"))]

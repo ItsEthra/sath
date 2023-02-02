@@ -39,7 +39,7 @@ macro_rules! forward_float_impl {
             const ZERO: Self;
 
             $(
-                fn $method(&self, $($aname: $aty)*) $(-> $ret)?;
+                fn $method(&self, $($aname: $aty),*) $(-> $ret)?;
             )*
         }
 
@@ -52,7 +52,7 @@ macro_rules! forward_float_impl {
 
             $(
                 #[inline(always)]
-                fn $method(&self, $($aname: $aty)*) $(-> $ret)? {
+                fn $method(&self, $($aname: $aty),*) $(-> $ret)? {
                     (*self as f32).$method($($aname),*)
                 }
             )*
@@ -67,7 +67,7 @@ macro_rules! forward_float_impl {
 
             $(
                 #[inline(always)]
-                fn $method(&self, $($aname: $aty)*) $(-> $ret)? {
+                fn $method(&self, $($aname: $aty),*) $(-> $ret)? {
                     (*self as f64).$method($($aname),*)
                 }
             )*
@@ -88,6 +88,7 @@ forward_float_impl! { f32, f64,
     fn acos() -> Self;
     fn ln() -> Self;
     fn asin() -> Self;
+    fn clamp(from: Self, to: Self) -> Self;
     fn max(other: Self) -> Self;
     fn min(other: Self) -> Self;
 }

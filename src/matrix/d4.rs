@@ -1,4 +1,4 @@
-use crate::{Aspect, Float, Vector3, Vector4};
+use crate::{Float, Vector3, Vector4};
 use std::{
     fmt,
     mem::swap,
@@ -34,46 +34,16 @@ impl<F: Float> Matrix4<F> {
     /// Creates new matrix where diagonal entries set to the elements of the vector.
     pub const fn new_diagonal(diag: Vector4<F>) -> Self {
         Self {
-            row1: Vector4::new(diag.x, 0., 0., 0.),
-            row2: Vector4::new(0., diag.y, 0., 0.),
-            row3: Vector4::new(0., 0., diag.z, 0.),
-            row4: Vector4::new(0., 0., 0., diag.w),
-        }
-    }
-
-    /// Creates new orthographic projection matrix.
-    pub fn new_orthographic_projection(
-        right: F,
-        left: F,
-        top: F,
-        bottom: F,
-        near: F,
-        far: F,
-    ) -> Self {
-        Self {
-            row1: Vector4::new(2. / (right - left), 0., 0., (left + right) / (left - right)),
-            row2: Vector4::new(0., 0., 2. / (top - bottom), (bottom + top) / (bottom - top)),
-            row3: Vector4::new(0., 1. / (far - near), 0., near / (near - far)),
-            row4: Vector4::W,
-        }
-    }
-
-    /// Creates new perspective projection matrix with `fov` in radians.
-    pub fn new_perspective_projection(fov: F, aspect: Aspect, near: F, far: F) -> Self {
-        let f = 1. / (fov / 2.).tan();
-        let lambda = far / (far - near);
-
-        Self {
-            row1: Vector4::new(aspect.h_w() * f, 0., 0., 0.),
-            row2: Vector4::new(0., 0., f, 0.),
-            row3: Vector4::new(0., lambda, 0., -lambda * near),
-            row4: Vector4::new(0., 1., 0., 0.),
+            row1: Vector4::new(diag.x, F::ZERO, F::ZERO, F::ZERO),
+            row2: Vector4::new(F::ZERO, diag.y, F::ZERO, F::ZERO),
+            row3: Vector4::new(F::ZERO, F::ZERO, diag.z, F::ZERO),
+            row4: Vector4::new(F::ZERO, F::ZERO, F::ZERO, diag.w),
         }
     }
 
     /// Creates new matrix that represents translation in 3D space.
     pub const fn new_translation(translation: Vector3<F>) -> Self {
-        let mut m = Self::IDENTITY;
+        let mut m: Self = todo!();
         m.row1.w = translation.x;
         m.row2.w = translation.y;
         m.row3.w = translation.z;
@@ -220,7 +190,8 @@ impl<F: Float> Matrix4<F> {
     /// Computes the determinant of the matrix.
     pub fn det(&self) -> F {
         let mut copy = *self;
-        copy.to_row_echelon();
+        todo!();
+        // copy.to_row_echelon();
 
         copy.diagonal().product()
     }
@@ -312,12 +283,6 @@ impl<F: Float> fmt::Debug for Matrix4<F> {
             self.row3.x, self.row3.y, self.row3.z, self.row3.w,
             self.row4.x, self.row4.y, self.row4.z, self.row4.w,
         )
-    }
-}
-
-impl<F: Float> Default for Matrix4<F> {
-    fn default() -> Self {
-        Self::IDENTITY
     }
 }
 

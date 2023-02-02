@@ -26,8 +26,8 @@ impl<F: Float> Matrix2<F> {
     /// Creates a new matrix from diagonal vector. All other elements are equal to `0`.
     pub const fn new_diagonal(diag: Vector2<F>) -> Self {
         Self {
-            row1: Vector2::new(diag.x, 0.),
-            row2: Vector2::new(0., diag.y),
+            row1: Vector2::new(diag.x, F::ZERO),
+            row2: Vector2::new(F::ZERO, diag.y),
         }
     }
 
@@ -199,12 +199,6 @@ impl<F: Float> Debug for Matrix2<F> {
             "[\n\t{}\t{}\n\t{}\t{}\n]",
             self.row1.x, self.row1.y, self.row2.x, self.row2.y
         )
-    }
-}
-
-impl<F: Float> Default for Matrix2<F> {
-    fn default() -> Self {
-        Self::IDENTITY
     }
 }
 

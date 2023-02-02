@@ -10,12 +10,6 @@ pub struct Vector2<F: Float> {
 }
 
 impl<F: Float> Vector2<F> {
-    /// Creates new vector.
-    #[inline]
-    pub const fn new(x: F, y: F) -> Self {
-        Self { x, y }
-    }
-
     /// Converts a vector to a complex number with `real` = `x`, `imag` = `y`.
     #[inline]
     pub const fn to_complex(self) -> Complex<F> {
@@ -42,12 +36,6 @@ impl<F: Float> Vector2<F> {
             y: self.y,
             z,
         }
-    }
-
-    /// Computes dot product
-    #[inline]
-    pub fn dot(&self, other: Self) -> F {
-        self.x * other.x + self.y * other.y
     }
 
     /// Rotates angle around origin by some angle `angle` in radians counter-clockwise.
@@ -99,3 +87,6 @@ impl<F: Float> Mul<Complex<F>> for Vector2<F> {
 
 unsafe impl<F: Float> bytemuck::Pod for Vector2<F> {}
 unsafe impl<F: Float> bytemuck::Zeroable for Vector2<F> {}
+
+crate::__impl_vec_ops!(Vector2, 1, x, y);
+crate::__impl_planar_ops!(Vector2, [x, 0, F], [y, 1, F]);

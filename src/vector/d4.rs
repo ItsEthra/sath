@@ -11,11 +11,6 @@ pub struct Vector4<F: Float> {
 }
 
 impl<F: Float> Vector4<F> {
-    #[inline]
-    pub const fn new(x: F, y: F, z: F, w: F) -> Self {
-        Self { x, y, z, w }
-    }
-
     /// Truncates vector to [`Vector3`], removing `w` component.
     pub const fn truncate(self) -> Vector3<F> {
         Vector3 {
@@ -24,13 +19,10 @@ impl<F: Float> Vector4<F> {
             z: self.z,
         }
     }
-
-    /// Computes dot product
-    #[inline]
-    pub fn dot(&self, other: Self) -> F {
-        self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
-    }
 }
 
 unsafe impl<F: Float> bytemuck::Pod for Vector4<F> {}
 unsafe impl<F: Float> bytemuck::Zeroable for Vector4<F> {}
+
+crate::__impl_vec_ops!(Vector4, 3, x, y, z, w);
+crate::__impl_planar_ops!(Vector4, [x, 0, F], [y, 1, F], [z, 2, F], [w, 3, F]);

@@ -47,9 +47,9 @@ impl<F: Float> Matrix3<F> {
     /// Creates a new matrix from diagonal vector. All other elements are equal to `0`.
     pub const fn new_diagonal(diag: Vector3<F>) -> Self {
         Self {
-            row1: Vector3::new(diag.x, 0., 0.),
-            row2: Vector3::new(0., diag.y, 0.),
-            row3: Vector3::new(0., 0., diag.z),
+            row1: Vector3::new(diag.x, F::ZERO, F::ZERO),
+            row2: Vector3::new(F::ZERO, diag.y, F::ZERO),
+            row3: Vector3::new(F::ZERO, F::ZERO, diag.z),
         }
     }
 
@@ -70,27 +70,27 @@ impl<F: Float> Matrix3<F> {
     /// Creates a matrix which specifies a rotation around `X` axis.
     pub fn new_rotation_x(angle: F) -> Self {
         Self {
-            row1: Vector3::X,
-            row2: Vector3::new(0., angle.cos(), -angle.sin()),
-            row3: Vector3::new(0., angle.sin(), angle.cos()),
+            row1: Vector3::new(F::ONE, F::ZERO, F::ZERO),
+            row2: Vector3::new(F::ZERO, angle.cos(), -angle.sin()),
+            row3: Vector3::new(F::ZERO, angle.sin(), angle.cos()),
         }
     }
 
     /// Creates a matrix which specifies a rotation around `Y` axis.
     pub fn new_rotation_y(angle: F) -> Self {
         Self {
-            row1: vector!(angle.cos(), 0, angle.sin()),
-            row2: Vector3::Y,
-            row3: vector!(-angle.sin(), 0, angle.cos()),
+            row1: Vector3::new(angle.cos(), F::ZERO, angle.sin()),
+            row2: Vector3::new(F::ZERO, F::ONE, F::ZERO),
+            row3: Vector3::new(-angle.sin(), F::ZERO, angle.cos()),
         }
     }
 
     /// Creates a matrix which specifies a rotation around `Z` axis.
     pub fn new_rotation_z(angle: F) -> Self {
         Self {
-            row1: vector!(angle.cos(), -angle.sin(), 0),
-            row2: vector!(angle.sin(), angle.cos(), 0),
-            row3: Vector3::Z,
+            row1: Vector3::new(angle.cos(), -angle.sin(), F::ZERO),
+            row2: Vector3::new(angle.sin(), angle.cos(), F::ZERO),
+            row3: Vector3::new(F::ZERO, F::ZERO, F::ONE),
         }
     }
 
@@ -134,7 +134,7 @@ impl<F: Float> Matrix3<F> {
 
     /// Extracts an angle of rotation if matrix represents a rotation.
     pub fn rotation_angle(&self) -> F {
-        ((self.trace() - 1.) / 2.).acos()
+        ((self.trace() - F::ONE) / F::TWO).acos()
     }
 
     /// Extracts axis and angle of rotation if matrix represents a rotation.
@@ -147,20 +147,20 @@ impl<F: Float> Matrix3<F> {
     /// To avoid unexpected results, use normalized axis.
     pub fn from_axis_angle(axis: Vector3<F>, angle: F) -> Self {
         Self {
-            row1: vector!(
-                angle.cos() + axis.x * axis.x * (1. - angle.cos()),
-                axis.x * axis.y * (1. - angle.cos()) - axis.z * angle.sin(),
-                axis.x * axis.z * (1. - angle.cos()) + axis.y * angle.sin(),
+            row1: Vector3::new(
+                angle.cos() + axis.x * axis.x * (F::ONE - angle.cos()),
+                axis.x * axis.y * (F::ONE - angle.cos()) - axis.z * angle.sin(),
+                axis.x * axis.z * (F::ONE - angle.cos()) + axis.y * angle.sin(),
             ),
-            row2: vector!(
-                axis.y * axis.x * (1. - angle.cos()) + axis.z * angle.sin(),
-                angle.cos() + axis.y * axis.y * (1. - angle.cos()),
-                axis.y * axis.z * (1. - angle.cos()) - axis.x * angle.sin(),
+            row2: Vector3::new(
+                axis.y * axis.x * (F::ONE - angle.cos()) + axis.z * angle.sin(),
+                angle.cos() + axis.y * axis.y * (F::ONE - angle.cos()),
+                axis.y * axis.z * (F::ONE - angle.cos()) - axis.x * angle.sin(),
             ),
-            row3: vector!(
-                axis.z * axis.x * (1. - angle.cos()) - axis.y * angle.sin(),
-                axis.z * axis.y * (1. - angle.cos()) + axis.x * angle.sin(),
-                angle.cos() + axis.z * axis.z * (1. - angle.cos())
+            row3: Vector3::new(
+                axis.z * axis.x * (F::ONE - angle.cos()) - axis.y * angle.sin(),
+                axis.z * axis.y * (F::ONE - angle.cos()) + axis.x * angle.sin(),
+                angle.cos() + axis.z * axis.z * (F::ONE - angle.cos()),
             ),
         }
     }
@@ -266,7 +266,8 @@ impl<F: Float> Matrix3<F> {
     /// Computes the determinant of the matrix.
     pub fn det(&self) -> F {
         let mut copy = *self;
-        copy.to_row_echelon();
+        todo!();
+        // copy.to_row_echelon();
 
         copy.diagonal().product()
     }
@@ -353,12 +354,6 @@ impl<F: Float> fmt::Debug for Matrix3<F> {
             self.row2.x, self.row2.y, self.row2.z,
             self.row3.x, self.row3.y, self.row3.z
         )
-    }
-}
-
-impl<F: Float> Default for Matrix3<F> {
-    fn default() -> Self {
-        Self::IDENTITY
     }
 }
 

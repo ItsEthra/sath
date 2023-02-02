@@ -32,6 +32,8 @@ macro_rules! forward_float_impl {
             Sized +
             'static
         {
+            const PI: Self;
+            const EPSILON: Self;
             const TWO: Self;
             const ONE: Self;
             const ZERO: Self;
@@ -42,6 +44,8 @@ macro_rules! forward_float_impl {
         }
 
         impl Float for $f32 {
+            const PI: Self = core::f32::consts::PI;
+            const EPSILON: Self = f32::EPSILON;
             const TWO: Self = 2.0;
             const ONE: Self = 1.0;
             const ZERO: Self = 0.0;
@@ -49,12 +53,14 @@ macro_rules! forward_float_impl {
             $(
                 #[inline(always)]
                 fn $method(&self, $($aname: $aty)*) $(-> $ret)? {
-                    self.$method($($aname),*)
+                    (*self as f32).$method($($aname),*)
                 }
             )*
         }
 
         impl Float for $f64 {
+            const PI: Self = core::f64::consts::PI;
+            const EPSILON: Self = f64::EPSILON;
             const TWO: Self = 2.0;
             const ONE: Self = 1.0;
             const ZERO: Self = 0.0;
@@ -62,7 +68,7 @@ macro_rules! forward_float_impl {
             $(
                 #[inline(always)]
                 fn $method(&self, $($aname: $aty)*) $(-> $ret)? {
-                    self.$method($($aname),*)
+                    (*self as f64).$method($($aname),*)
                 }
             )*
         }
@@ -78,4 +84,10 @@ forward_float_impl! { f32, f64,
     fn to_degrees() -> Self;
     fn sqrt() -> Self;
     fn signum() -> Self;
+    fn abs() -> Self;
+    fn acos() -> Self;
+    fn ln() -> Self;
+    fn asin() -> Self;
+    fn max(other: Self) -> Self;
+    fn min(other: Self) -> Self;
 }

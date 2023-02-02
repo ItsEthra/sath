@@ -10,12 +10,6 @@ pub struct Vector3<F: Float> {
 }
 
 impl<F: Float> Vector3<F> {
-    /// Creates new vector from `x`, `y`, `z` components.
-    #[inline]
-    pub const fn new(x: F, y: F, z: F) -> Self {
-        Self { x, y, z }
-    }
-
     /// Extends the vector with `w` component to create a [`Vector4`].
     pub const fn extend(self, w: F) -> Vector4<F> {
         Vector4 {
@@ -43,12 +37,6 @@ impl<F: Float> Vector3<F> {
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
         }
-    }
-
-    /// Computes dot product between two vectors.
-    #[inline]
-    pub fn dot(&self, other: Self) -> F {
-        self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     /// Computes triple product between three vectors.
@@ -79,3 +67,6 @@ impl<F: Float> Vector3<F> {
 
 unsafe impl<F: Float> bytemuck::Pod for Vector3<F> {}
 unsafe impl<F: Float> bytemuck::Zeroable for Vector3<F> {}
+
+crate::__impl_vec_ops!(Vector3, 2, x, y, z);
+crate::__impl_planar_ops!(Vector3, [x, 0, F], [y, 1, F], [z, 2, F]);

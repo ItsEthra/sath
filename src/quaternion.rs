@@ -60,26 +60,27 @@ impl<F: Float> Quaternion<F> {
     pub fn into_axis_angle(&self) -> (Vector3<F>, F) {
         (
             self.vector.normalized(),
-            self.vector.magnitude().atan2(self.scalar) * 2.,
+            self.vector.magnitude().atan2(self.scalar) * F::TWO,
         )
     }
-
     /// Converts quaternion into euler angles.
     #[inline]
     pub fn into_euler(&self) -> Euler<Rad, F> {
-        Euler::<Rad>::new(
-            (2. * (self.scalar * self.vector.z + self.vector.x * self.vector.y))
-                .atan2(1. - 2. * (self.vector.y * self.vector.y + self.vector.z * self.vector.z)),
-            (2. * (self.scalar * self.vector.x + self.vector.y * self.vector.z))
-                .atan2(1. - 2. * (self.vector.x * self.vector.x + self.vector.y * self.vector.y)),
-            (2. * (self.scalar * self.vector.y - self.vector.z * self.vector.x)).asin(),
+        Euler::new(
+            (F::TWO * (self.scalar * self.vector.z + self.vector.x * self.vector.y)).atan2(
+                F::ONE - F::TWO * (self.vector.y * self.vector.y + self.vector.z * self.vector.z),
+            ),
+            (F::TWO * (self.scalar * self.vector.x + self.vector.y * self.vector.z)).atan2(
+                F::ONE - F::TWO * (self.vector.x * self.vector.x + self.vector.y * self.vector.y),
+            ),
+            (F::TWO * (self.scalar * self.vector.y - self.vector.z * self.vector.x)).asin(),
         )
     }
 
     /// Converts euler angles to quaternion.
     #[inline]
     pub fn from_euler(angles: Euler<Rad, F>) -> Self {
-        let half = angles / 2.;
+        let half = angles / F::TWO;
 
         Self {
             scalar: half.pitch.cos() * half.roll.cos() * half.yaw.cos()
@@ -99,7 +100,7 @@ impl<F: Float> Quaternion<F> {
     #[inline]
     pub fn from_vector(vector: Vector3<F>) -> Self {
         Self {
-            scalar: 0.0,
+            scalar: F::ZERO,
             vector,
         }
     }
@@ -199,7 +200,7 @@ impl<F: Float> Quaternion<F> {
 
     /// Linearly interpolates the quaternion.
     pub fn lerp(self, end: Self, t: F) -> Self {
-        self * (1.0 - t) + end * t
+        self * (F::ONE - t) + end * t
     }
 
     /// Returns a normalized copy of linear interpolation.
@@ -218,15 +219,21 @@ impl<F: Float> Quaternion<F> {
             self.scalar * self.scalar + self.vector.x * self.vector.x
                 - self.vector.y * self.vector.y
                 - self.vector.z * self.vector.z,
-            2. * self.vector.x * self.vector.y - 2. * self.scalar * self.vector.z,
-            2. * self.vector.x * self.vector.z + 2. * self.scalar * self.vector.y,
-            2. * self.vector.x * self.vector.y + 2. * self.scalar * self.vector.z,
+            (F::ONE + F::ONE) * self.vector.x * self.vector.y
+                - (F::ONE + F::ONE) * self.scalar * self.vector.z,
+            (F::ONE + F::ONE) * self.vector.x * self.vector.z
+                + (F::ONE + F::ONE) * self.scalar * self.vector.y,
+            (F::ONE + F::ONE) * self.vector.x * self.vector.y
+                + (F::ONE + F::ONE) * self.scalar * self.vector.z,
             self.scalar * self.scalar - self.vector.x * self.vector.x
                 + self.vector.y * self.vector.y
                 - self.vector.z * self.vector.z,
-            2. * self.vector.y * self.vector.z - 2. * self.scalar * self.vector.x,
-            2. * self.vector.x * self.vector.z - 2. * self.scalar * self.vector.y,
-            2. * self.vector.y * self.vector.z + 2. * self.scalar * self.vector.x,
+            (F::ONE + F::ONE) * self.vector.y * self.vector.z
+                - (F::ONE + F::ONE) * self.scalar * self.vector.x,
+            (F::ONE + F::ONE) * self.vector.x * self.vector.z
+                - (F::ONE + F::ONE) * self.scalar * self.vector.y,
+            (F::ONE + F::ONE) * self.vector.y * self.vector.z
+                + (F::ONE + F::ONE) * self.scalar * self.vector.x,
             self.scalar * self.scalar
                 - self.vector.x * self.vector.x
                 - self.vector.y * self.vector.y

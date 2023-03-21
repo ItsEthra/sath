@@ -566,7 +566,7 @@ macro_rules! __impl_vec_ops {
 
             /// Converts the vector to a mutable array slice.
             #[inline]
-            pub fn as_array_mut<'a>(&'a mut self) -> &'a [F; $dim + 1] {
+            pub fn as_array_mut(&mut self) -> &[F; $dim + 1] {
                 unsafe { std::mem::transmute_copy(&self) }
             }
 

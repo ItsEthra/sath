@@ -308,7 +308,9 @@ impl<F: Float> fmt::Debug for Matrix4<F> {
     }
 }
 
+#[cfg(feature = "bytemuck")]
 unsafe impl<F: Float> bytemuck::Pod for Matrix4<F> {}
+#[cfg(feature = "bytemuck")]
 unsafe impl<F: Float> bytemuck::Zeroable for Matrix4<F> {}
 
 crate::__impl_mat_ops!(Matrix4, Vector4, 4, row1, row2, row3, row4);

@@ -138,7 +138,9 @@ impl<F: Float> Mul<Complex<F>> for Vector2<F> {
     }
 }
 
+#[cfg(feature = "bytemuck")]
 unsafe impl<F: Float> bytemuck::Pod for Vector2<F> {}
+#[cfg(feature = "bytemuck")]
 unsafe impl<F: Float> bytemuck::Zeroable for Vector2<F> {}
 
 crate::__impl_vec_ops!(Vector2, 1, x, y);

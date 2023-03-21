@@ -87,7 +87,9 @@ impl<F: Float> Vector4<F> {
     }
 }
 
+#[cfg(feature = "bytemuck")]
 unsafe impl<F: Float> bytemuck::Pod for Vector4<F> {}
+#[cfg(feature = "bytemuck")]
 unsafe impl<F: Float> bytemuck::Zeroable for Vector4<F> {}
 
 crate::__impl_vec_ops!(Vector4, 3, x, y, z, w);

@@ -211,7 +211,9 @@ impl<F: Float> Debug for Matrix2<F> {
     }
 }
 
+#[cfg(feature = "bytemuck")]
 unsafe impl<F: Float> bytemuck::Pod for Matrix2<F> {}
+#[cfg(feature = "bytemuck")]
 unsafe impl<F: Float> bytemuck::Zeroable for Matrix2<F> {}
 
 crate::__impl_mat_ops!(Matrix2, Vector2, 2, row1, row2);

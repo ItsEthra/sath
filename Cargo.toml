@@ -1,14 +1,11 @@
 [package]
 name = "sath"
 description = "Toy math library"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 authors = ["ItsEthra"]
 repository = "https://github.com/ItsEthra/sath"
 
-[features]
-use-f64 = []
-
 [dependencies]
-bytemuck = "1.13"
+bytemuck = { version = "1", optional = true }
